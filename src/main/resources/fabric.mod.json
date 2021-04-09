@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "fabrilousupdater",
+  "version": "${version}",
+
+  "name": "FabrilousUpdater",
+  "description": "Easy mod updater for fabric.",
+  "authors": [
+    "HughBone"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "MIT",
+  "icon": "assets/fabrilousupdater/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.hughbone.fabrilousupdater.FabrilousUpdater"
+    ]
+  },
+  "mixins": [
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
