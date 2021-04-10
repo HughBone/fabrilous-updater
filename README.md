@@ -13,4 +13,4 @@ Place the mod in your mods folder and make sure you run it once. Then, open the 
 
 ![](readme-images/1.png)
 
-![](readme-images/2.png) (3 mods added)
+![](readme-images/2.png) (3 mods addedz)
