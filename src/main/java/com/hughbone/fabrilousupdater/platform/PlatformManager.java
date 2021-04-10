@@ -10,19 +10,17 @@ import java.io.*;
 public class PlatformManager {
 
     public static ServerCommandSource commandSource;
+    public static String modName;
 
-    private static String platformStart(String pID) throws IOException, CommandSyntaxException {
+    private static void platformStart(String pID) throws IOException, CommandSyntaxException {
         // CurseForge
         if (pID.length() == 6) {
             CurseForgeUpdater.start(pID);
-            return "curseforge";
         }
         // Modrinth
         else if (pID.length() == 8) {
             ModrinthUpdater.start(pID);
-            return "modrinth";
         }
-        return null;
     }
 
     public static void readConfig(ServerCommandSource source) throws IOException, CommandSyntaxException {
@@ -36,17 +34,13 @@ public class PlatformManager {
             String[] lineArray = line.split(" ");
             String pID = lineArray[0]; // Get project ID
             lineArray = ArrayUtils.remove(lineArray, 0);
-            String modName = String.join(" ", lineArray); // Get mod name
+            String modNameCheck = String.join(" ", lineArray); // Get mod name
 
-            String platform = platformStart(pID);
+            platformStart(pID); // Gets mod update based on platform
 
             // Add modname if not already in config file
-            if (modName.length() < 3) {
-                if (platform == "curseforge") {
-                }
-                else if (platform == "modrinth") {
-                }
-                //line = line.replace(line, line + " (" + modPage.name + ")");
+            if (modNameCheck.length() < 3) {
+                line = pID + " (" + modName + ")";
             }
             entireConfig += line + "\n";
         }

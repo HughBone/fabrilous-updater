@@ -82,6 +82,11 @@ public class CurseForgeUpdater {
                     }
                 }
             }
+            // Get mod name
+            JsonObject json2 = Util.getJsonObject(sURL + pID);
+            ModPage modPage = new ModPage(json2);
+            PlatformManager.modName = modPage.name;
+
             // Check if an update is needed
             boolean upToDate = false;
             for (File child : listDir) {
@@ -91,8 +96,6 @@ public class CurseForgeUpdater {
                 }
             }
             if (!upToDate) {
-                JsonObject json2 = Util.getJsonObject(sURL + pID);
-                ModPage modPage = new ModPage(json2);
                 Util.sendMessage(modPage.websiteUrl, newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
             }
         }
