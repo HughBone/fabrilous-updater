@@ -14,13 +14,13 @@ public class CurseForgeUpdater {
 
     private static final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
 
-    private static class ReleaseFile {
+    private static class CurseReleaseFile {
         private String fileName;
         private String fileDate;
         private String downloadUrl;
         private ArrayList<String> gameVersions = new ArrayList<>();
 
-        ReleaseFile(JsonObject json) {
+        CurseReleaseFile(JsonObject json) {
             this.fileName = json.get("fileName").toString().replace("\"", "");
             this.fileDate = json.get("fileDate").toString().replace("\"", "");
             this.downloadUrl = json.get("downloadUrl").toString();
@@ -31,11 +31,11 @@ public class CurseForgeUpdater {
         }
     }
 
-    private static class ModPage {
+    private static class CurseModPage {
         private String name;
         private String websiteUrl;
 
-        ModPage(JsonObject json) {
+        CurseModPage(JsonObject json) {
             this.name = json.get("name").toString().replace("\"", "");
             this.websiteUrl = json.get("websiteUrl").toString().replace("\"", "");
         }
@@ -56,10 +56,10 @@ public class CurseForgeUpdater {
             // Get entire json list of release info
             JsonArray json1 = Util.getJsonArray(sURL + pID + "/files");
             // Find newest release for MC version
-            ReleaseFile newestFile = null;
+            CurseReleaseFile newestFile = null;
             int date = 0;
             for (JsonElement jsonElement : json1) {
-                ReleaseFile currentFile = new ReleaseFile(jsonElement.getAsJsonObject());
+                CurseReleaseFile currentFile = new CurseReleaseFile(jsonElement.getAsJsonObject());
 
                 String gameVersionsString = String.join(" ", currentFile.gameVersions); // states mc version, fabric, forge
                 // Skip if it contains forge and not fabric
@@ -84,7 +84,7 @@ public class CurseForgeUpdater {
             }
             // Get mod name
             JsonObject json2 = Util.getJsonObject(sURL + pID);
-            ModPage modPage = new ModPage(json2);
+            CurseModPage modPage = new CurseModPage(json2);
             PlatformManager.modName = modPage.name;
 
             // Check if an update is needed
@@ -96,7 +96,7 @@ public class CurseForgeUpdater {
                 }
             }
             if (!upToDate) {
-                Util.sendMessage(modPage.websiteUrl, newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
+                Util.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
             }
         }
     }
