@@ -1,6 +1,5 @@
 package com.hughbone.fabrilousupdater.command;
 
-import com.hughbone.fabrilousupdater.CheckForUpdate;
 import com.hughbone.fabrilousupdater.FabrilousUpdater;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;

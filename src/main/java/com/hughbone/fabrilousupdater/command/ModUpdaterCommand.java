@@ -1,6 +1,6 @@
 package com.hughbone.fabrilousupdater.command;
 
-import com.hughbone.fabrilousupdater.CheckForUpdate;
+import com.hughbone.fabrilousupdater.platform.CurseForgeUpdater;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -37,7 +37,7 @@ public class ModUpdaterCommand {
 
 
             source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
-            CheckForUpdate.start(source);
+            CurseForgeUpdater.start(source);
             source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
         }
     }

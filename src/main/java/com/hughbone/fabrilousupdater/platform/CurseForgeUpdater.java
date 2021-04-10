@@ -1,9 +1,10 @@
-package com.hughbone.fabrilousupdater;
+package com.hughbone.fabrilousupdater.platform;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.hughbone.fabrilousupdater.FabrilousUpdater;
 import com.hughbone.fabrilousupdater.util.Util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
@@ -16,7 +17,7 @@ import java.net.URL;
 import java.io.*;
 import java.util.ArrayList;
 
-public class CheckForUpdate {
+public class CurseForgeUpdater {
 
     private static final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
 
@@ -70,7 +71,7 @@ public class CheckForUpdate {
                 // loop through mod IDs
                 while ((configLn = reader.readLine()) != null) {
                     configLn = configLn.substring(0, 6);
-                    JsonArray json1 = getJsonArray(sURL + configLn + "/files"); // Get entire json list of release info
+                    JsonArray json1 = Util.getJsonArray(sURL + configLn + "/files"); // Get entire json list of release info
 
                     // Find newest release for MC version
                     ReleaseFile newestFile = null;
@@ -109,7 +110,7 @@ public class CheckForUpdate {
                         }
                     }
                     if (!upToDate) {
-                        JsonObject json2 = getJsonObject(sURL + configLn);
+                        JsonObject json2 = Util.getJsonObject(sURL + configLn);
                         ModPage modPage = new ModPage(json2);
 
                         sendMessage(source, newestFile, modPage); // Sends update message to player
@@ -122,32 +123,7 @@ public class CheckForUpdate {
         }
     }
 
-    private static String getJsonString(String sURL) {
-        try {
-            URL obj = new URL(sURL);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-            return response.toString();
-        } catch (Exception e){
-            return null;
-        }
-    }
-    private static JsonArray getJsonArray(String sURL) {
-        String jsonStr = getJsonString(sURL);
-        JsonParser jp = new JsonParser();
-        return (JsonArray) jp.parse(jsonStr);
-    }
-    private static JsonObject getJsonObject(String sURL) {
-        String jsonStr = getJsonString(sURL);
-        JsonParser jp = new JsonParser();
-        return (JsonObject) jp.parse(jsonStr);
-    }
+
 
     private static void writeModNames() throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(FabrilousUpdater.path));
@@ -156,7 +132,7 @@ public class CheckForUpdate {
         // Add mod name next to ID if not already there
         while ((line = reader.readLine()) != null) {
             if (line.length() < 8) {
-                JsonObject json2 = getJsonObject(sURL + line);
+                JsonObject json2 = Util.getJsonObject(sURL + line);
                 ModPage modPage = new ModPage(json2);
 
                 line = line.replace(line, line + " (" + modPage.name + ")");
