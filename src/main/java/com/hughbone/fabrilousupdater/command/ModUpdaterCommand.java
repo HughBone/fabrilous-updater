@@ -1,6 +1,6 @@
 package com.hughbone.fabrilousupdater.command;
 
-import com.hughbone.fabrilousupdater.platform.CurseForgeUpdater;
+import com.hughbone.fabrilousupdater.platform.PlatformManager;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,16 +29,19 @@ public class ModUpdaterCommand {
     private static class ListThread extends Thread{
 
         private ServerCommandSource source;
+
         public ListThread(ServerCommandSource source) {
             this.source = source;
         }
+
         public void run() {
-
-
-
-            source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
-            CurseForgeUpdater.start(source);
-            source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
+            try {
+                source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
+                PlatformManager.readConfig(source);
+                source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

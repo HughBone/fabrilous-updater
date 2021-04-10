@@ -3,19 +3,33 @@ package com.hughbone.fabrilousupdater.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.hughbone.fabrilousupdater.platform.PlatformManager;
 import com.mojang.bridge.game.GameVersion;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.MinecraftVersion;
+import net.minecraft.server.command.CommandManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
 
 public class Util {
+
+    public static void sendMessage(String websiteUrl, String downloadUrl, String fileName) throws CommandSyntaxException {
+        CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
+
+        String commandString = "tellraw @p [\"\",{\"text\":\"[Click Me] \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url1\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{\"text\":\"Update found: \"},{\"text\":\"$modname\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url2\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]";
+        commandString = commandString.replace("$url1", websiteUrl + "/files");
+        commandString = commandString.replace("$url2", downloadUrl);
+        commandString = commandString.replace("$modname", fileName);
+
+        cm.getDispatcher().execute(commandString, PlatformManager.commandSource);
+    }
+
+
 
     private static String getJsonString(String sURL) {
         try {
@@ -82,10 +96,5 @@ public class Util {
         updateMinecraftVersion();
         return minecraftVersion;
     }
-
-
-
-
-
 
 }
