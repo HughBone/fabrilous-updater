@@ -3,7 +3,7 @@ package com.hughbone.fabrilousupdater.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.hughbone.fabrilousupdater.platform.PlatformManager;
+import com.hughbone.fabrilousupdater.platform.ModPlatform;
 import com.mojang.bridge.game.GameVersion;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
 
-public class Util {
+public class FabdateUtil {
 
     public static void sendMessage(String websiteUrl, String downloadUrl, String fileName) throws CommandSyntaxException {
         CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
@@ -26,7 +26,7 @@ public class Util {
         commandString = commandString.replace("$url2", downloadUrl);
         commandString = commandString.replace("$modname", fileName);
 
-        cm.getDispatcher().execute(commandString, PlatformManager.commandSource);
+        cm.getDispatcher().execute(commandString, ModPlatform.commandSource);
     }
 
     private static String getJsonString(String sURL) {
@@ -47,11 +47,13 @@ public class Util {
     }
     public static JsonArray getJsonArray(String sURL) {
         String jsonStr = getJsonString(sURL);
-        return JsonParser.parseString(jsonStr).getAsJsonArray();
+        JsonParser jp = new JsonParser();
+        return jp.parse(jsonStr).getAsJsonArray();
     }
     public static JsonObject getJsonObject(String sURL) {
         String jsonStr = getJsonString(sURL);
-        return JsonParser.parseString(jsonStr).getAsJsonObject();
+        JsonParser jp = new JsonParser();
+        return jp.parse(jsonStr).getAsJsonObject();
     }
 
     public static String urlToString(String urlStr) throws IOException {

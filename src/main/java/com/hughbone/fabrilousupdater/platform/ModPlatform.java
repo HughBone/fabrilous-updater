@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
 
-public class PlatformManager {
+public class ModPlatform {
 
     public static ServerCommandSource commandSource;
     public static String modName;

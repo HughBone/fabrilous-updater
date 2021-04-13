@@ -3,7 +3,7 @@ package com.hughbone.fabrilousupdater.platform;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hughbone.fabrilousupdater.util.Util;
+import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -52,13 +52,13 @@ public class ModrinthUpdater {
         File[] listDir = dir.listFiles();
         if (listDir != null) {
             // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
-            String versionStr = Util.getMinecraftVersion().getId();
+            String versionStr = FabdateUtil.getMinecraftVersion().getId();
             String[] versionStrSplit = versionStr.split("\\.");
             versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
             versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
             // Get entire json list of release info
-            JsonArray json1 = Util.getJsonArray(sURL + pID + "/version");
+            JsonArray json1 = FabdateUtil.getJsonArray(sURL + pID + "/version");
             // Find newest release for MC version
             ReleaseFile newestFile = null;
             int date = 0;
@@ -87,9 +87,9 @@ public class ModrinthUpdater {
                 }
             }
             // Get mod name
-            JsonObject json2 = Util.getJsonObject(sURL + pID);
+            JsonObject json2 = FabdateUtil.getJsonObject(sURL + pID);
             ModPage modPage = new ModPage(json2);
-            PlatformManager.modName = modPage.name;
+            ModPlatform.modName = modPage.name;
 
             // Check if an update is needed
             boolean upToDate = false;
@@ -100,7 +100,7 @@ public class ModrinthUpdater {
                 }
             }
             if (!upToDate) {
-                Util.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
+                FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
             }
         }
     }
