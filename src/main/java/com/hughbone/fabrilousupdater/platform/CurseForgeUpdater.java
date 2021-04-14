@@ -42,7 +42,6 @@ public class CurseForgeUpdater {
     }
 
     public static void start(String pID) throws IOException, CommandSyntaxException {
-
         // mods directory
         File dir = new File(System.getProperty("user.dir") + File.separator + "mods");
         File[] listDir = dir.listFiles();

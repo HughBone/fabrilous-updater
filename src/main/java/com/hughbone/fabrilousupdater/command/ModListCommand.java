@@ -15,7 +15,7 @@ public class ModListCommand {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdate")
                 .then(CommandManager.literal("list").executes(context -> {
-                    if (context.getSource().getWorld().isClient) {
+                    if (!isDedicated) {
                         new UpdateThread(context.getSource()).start();
                     }
                     else if (context.getSource().hasPermissionLevel(4)) {

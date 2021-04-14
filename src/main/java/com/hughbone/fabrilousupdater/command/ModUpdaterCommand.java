@@ -12,7 +12,7 @@ public class ModUpdaterCommand {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdate")
                 .then(CommandManager.literal("update").executes(context -> {
-                    if (context.getSource().getWorld().isClient) {
+                    if (!isDedicated) {
                         new ListThread(context.getSource()).start();
                     }
                     else if (context.getSource().hasPermissionLevel(4)) {
@@ -40,7 +40,6 @@ public class ModUpdaterCommand {
                 ModPlatform.readConfig(source);
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
             } catch (Exception e){
-                e.printStackTrace();
             }
         }
     }

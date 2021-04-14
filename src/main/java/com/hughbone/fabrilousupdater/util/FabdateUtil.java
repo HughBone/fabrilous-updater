@@ -21,12 +21,13 @@ public class FabdateUtil {
     public static void sendMessage(String websiteUrl, String downloadUrl, String fileName) throws CommandSyntaxException {
         CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
 
-        String commandString = "tellraw @p [\"\",{\"text\":\"[Click Me] \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url1\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{\"text\":\"Update found: \"},{\"text\":\"$modname\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url2\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]";
+        String commandString = "tellraw $player [\"\",{\"text\":\"[Click Me] \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url1\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{\"text\":\"Update found: \"},{\"text\":\"$modname\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url2\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]";
+        commandString = commandString.replace("$player", ModPlatform.commandSource.getName());
         commandString = commandString.replace("$url1", websiteUrl);
         commandString = commandString.replace("$url2", downloadUrl);
         commandString = commandString.replace("$modname", fileName);
 
-        cm.getDispatcher().execute(commandString, ModPlatform.commandSource);
+        cm.getDispatcher().execute(commandString, ModPlatform.commandSource.getMinecraftServer().getCommandSource());
     }
 
     private static String getJsonString(String sURL) {
