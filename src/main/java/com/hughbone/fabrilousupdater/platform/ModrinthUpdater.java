@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.io.File;
 import java.util.ArrayList;
 
+
 public class ModrinthUpdater {
 
     private static final String sURL = "https://api.modrinth.com/api/v1/mod/";

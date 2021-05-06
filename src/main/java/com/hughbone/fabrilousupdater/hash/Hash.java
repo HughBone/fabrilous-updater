@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+
 public class Hash {
 
     public static long getMurmurHash(File file) throws IOException {

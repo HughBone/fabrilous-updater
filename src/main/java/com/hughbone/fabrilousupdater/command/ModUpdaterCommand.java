@@ -6,6 +6,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 
+
 public class ModUpdaterCommand {
 
     public static void register() {
@@ -37,7 +38,7 @@ public class ModUpdaterCommand {
         public void run() {
             try {
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
-                ModPlatform.readConfig(source);
+                ModPlatform.platformStart(source);
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
             } catch (Exception e){
             }

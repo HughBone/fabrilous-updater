@@ -6,13 +6,12 @@ import com.google.gson.JsonObject;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+
 
 public class CurseForgeUpdater {
 
