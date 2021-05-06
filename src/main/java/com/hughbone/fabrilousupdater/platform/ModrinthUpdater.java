@@ -46,6 +46,13 @@ public class ModrinthUpdater {
         }
     }
 
+    public static String getProjectID(String sh1Hash) {
+        try {
+            JsonObject json = FabdateUtil.getJsonObject("https://api.modrinth.com/api/v1/version_file/" + sh1Hash + "?algorithm=sha1");
+            return json.get("mod_id").toString().replace("\"", "");
+        } catch (Exception e) {}
+        return null;
+    }
 
     public static void start(String pID) throws CommandSyntaxException {
         // mods directory

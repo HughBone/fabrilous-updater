@@ -60,15 +60,18 @@ public class CurseForgeUpdater {
 
         StringBuilder content;
         BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+
         String line;
         content = new StringBuilder();
         while ((line = br.readLine()) != null) {
             content.append(line);
-            content.append(System.lineSeparator());
         }
 
         urlConn.disconnect();
 
+        if (content.toString().contains("\"exactMatches\":[]")) {
+            return null;
+        }
         return content.toString();
 
     }

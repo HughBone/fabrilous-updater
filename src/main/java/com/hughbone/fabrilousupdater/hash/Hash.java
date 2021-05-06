@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class Hash {
 
-    public static long getMurmurHash(File file) throws IOException {
+    public static String getMurmurHash(File file) throws IOException {
         final int m = 0x5bd1e995;
         final int r = 24;
         long k = 0x0L;
@@ -100,7 +100,7 @@ public class Hash {
         h = h ^ (h >> 15);
         h = 0x00000000FFFFFFFFL & h;
 
-        return h;
+        return String.valueOf(h);
     }
 
 
