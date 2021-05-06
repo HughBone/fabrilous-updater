@@ -54,8 +54,7 @@ public class CurseForgeUpdater {
             String projectID = jsonObject.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("id").toString();
             CurrentMod currentMod = new CurrentMod(fileName, projectID);
             return currentMod;
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         return null;
     }
@@ -92,7 +91,7 @@ public class CurseForgeUpdater {
 
     }
 
-    public static void start(CurrentMod currentMod) throws CommandSyntaxException {
+    public static void start(CurrentMod currentMod) throws Exception {
         // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
         String versionStr = FabdateUtil.getMinecraftVersion().getId();
         String[] versionStrSplit = versionStr.split("\\.");

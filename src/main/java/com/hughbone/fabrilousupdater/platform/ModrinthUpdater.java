@@ -54,13 +54,12 @@ public class ModrinthUpdater {
             final String projectID = json.get("mod_id").toString().replace("\"", "");
             CurrentMod currentMod = new CurrentMod(fileName, projectID);
             return currentMod;
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         return null;
     }
 
-    public static void start(CurrentMod currentMod) throws CommandSyntaxException {
+    public static void start(CurrentMod currentMod) throws Exception {
         // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
         String versionStr = FabdateUtil.getMinecraftVersion().getId();
         String[] versionStrSplit = versionStr.split("\\.");
