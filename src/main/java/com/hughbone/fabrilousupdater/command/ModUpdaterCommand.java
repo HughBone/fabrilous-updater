@@ -47,8 +47,7 @@ public class ModUpdaterCommand {
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
                 ModPlatform.platformStart(source);
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
-            } catch (Exception e){
-            }
+            } catch (Exception e) {}
         }
     }
 

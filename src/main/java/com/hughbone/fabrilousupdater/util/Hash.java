@@ -1,4 +1,4 @@
-package com.hughbone.fabrilousupdater.hash;
+package com.hughbone.fabrilousupdater.util;
 
 import java.io.File;
 import java.io.FileInputStream;

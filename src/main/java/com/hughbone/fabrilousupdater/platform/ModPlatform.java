@@ -1,12 +1,12 @@
 package com.hughbone.fabrilousupdater.platform;
 
 import com.hughbone.fabrilousupdater.CurrentMod;
-import com.hughbone.fabrilousupdater.hash.Hash;
+import com.hughbone.fabrilousupdater.util.Hash;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 
-
 import java.io.*;
+
 
 public class ModPlatform {
 
@@ -17,7 +17,7 @@ public class ModPlatform {
         commandSource = cm;
 
         // Search through all mods
-        File directoryPath = new File("modtest"); // change to mods
+        File directoryPath = new File("mods"); // change to mods
         File filesList[] = directoryPath.listFiles();
         for (File modFile : filesList) {
             // Check if Modrinth mod
@@ -39,7 +39,7 @@ public class ModPlatform {
                 }
             }
             if (currentMod == null) {
-                commandSource.sendFeedback(new LiteralText("[Error] Did not find " + modFile.getName() + " in Modrinth or CurseForge"), false);
+                commandSource.sendFeedback(new LiteralText("[Error] '" + modFile.getName() + "' not found in Modrinth or CurseForge"), false);
             }
 
         }
