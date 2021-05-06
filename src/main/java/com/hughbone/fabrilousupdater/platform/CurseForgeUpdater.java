@@ -54,7 +54,8 @@ public class CurseForgeUpdater {
             String projectID = jsonObject.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("id").toString();
             CurrentMod currentMod = new CurrentMod(fileName, projectID);
             return currentMod;
-        } catch (Exception e){}
+        } catch (Exception e) {
+        }
 
         return null;
     }
@@ -92,61 +93,49 @@ public class CurseForgeUpdater {
     }
 
     public static void start(CurrentMod currentMod) throws CommandSyntaxException {
-        // mods directory
-        File dir = new File(System.getProperty("user.dir") + File.separator + "mods");
-        File[] listDir = dir.listFiles();
-        if (listDir != null) {
-            // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
-            String versionStr = FabdateUtil.getMinecraftVersion().getId();
-            String[] versionStrSplit = versionStr.split("\\.");
-            versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
-            versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
+        // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
+        String versionStr = FabdateUtil.getMinecraftVersion().getId();
+        String[] versionStrSplit = versionStr.split("\\.");
+        versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
+        versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
-            // Get entire json list of release info
-            JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
-            // Find newest release for MC version
-            CurseReleaseFile newestFile = null;
-            int date = 0;
-            for (JsonElement jsonElement : json1) {
-                CurseReleaseFile currentFile = new CurseReleaseFile(jsonElement.getAsJsonObject());
+        // Get entire json list of release info
+        JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
+        // Find newest release for MC version
+        CurseReleaseFile newestFile = null;
+        int date = 0;
+        for (JsonElement jsonElement : json1) {
+            CurseReleaseFile modFile = new CurseReleaseFile(jsonElement.getAsJsonObject());
 
-                String gameVersionsString = String.join(" ", currentFile.gameVersions); // states mc version, fabric, forge
-                // Skip if it contains forge and not fabric
-                if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
-                    continue;
-                }
-                // Allow if same MC version or if universal release
-                if (gameVersionsString.contains(versionStr) || currentFile.fileName.toLowerCase().contains("universal")) {
-                    // Format the date into an integer
-                    String[] fileDateSplit = currentFile.fileDate.split("-");
-                    fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
+            String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
+            // Skip if it contains forge and not fabric
+            if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
+                continue;
+            }
+            // Allow if same MC version or if universal release
+            if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
+                // Format the date into an integer
+                String[] fileDateSplit = modFile.fileDate.split("-");
+                fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
 
-                    // Compare release dates to get most recent mod version
-                    if (date == 0) {
-                        date = Integer.parseInt(String.join("", fileDateSplit));
-                        newestFile = currentFile;
-                    } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
-                        date = Integer.parseInt(String.join("", fileDateSplit));
-                        newestFile = currentFile;
-                    }
+                // Compare release dates to get most recent mod version
+                if (date == 0) {
+                    date = Integer.parseInt(String.join("", fileDateSplit));
+                    newestFile = modFile;
+                } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
+                    date = Integer.parseInt(String.join("", fileDateSplit));
+                    newestFile = modFile;
                 }
             }
+        }
+
+        if (!currentMod.fileName.equals(newestFile.fileName)) {
             // Get mod name
             JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             CurseModPage modPage = new CurseModPage(json2);
             ModPlatform.modName = modPage.name;
 
-            // Check if an update is needed
-            boolean upToDate = false;
-            for (File child : listDir) {
-                if (child.getName().equals(newestFile.fileName)) {
-                    upToDate = true;
-                    break;
-                }
-            }
-            if (!upToDate) {
-                FabdateUtil.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
-            }
+            FabdateUtil.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
         }
     }
 

@@ -8,7 +8,6 @@ import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 
 
@@ -26,7 +25,8 @@ public class ModrinthUpdater {
             this.fileDate = json.get("date_published").toString().replace("\"", "");
 
             for (JsonElement j : json.getAsJsonArray("files")) {
-                this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");;
+                this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");
+                ;
                 this.downloadUrl = j.getAsJsonObject().get("url").toString();
                 downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
             }
@@ -61,61 +61,50 @@ public class ModrinthUpdater {
     }
 
     public static void start(CurrentMod currentMod) throws CommandSyntaxException {
-        // mods directory
-        File dir = new File(System.getProperty("user.dir") + File.separator + "mods");
-        File[] listDir = dir.listFiles();
-        if (listDir != null) {
-            // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
-            String versionStr = FabdateUtil.getMinecraftVersion().getId();
-            String[] versionStrSplit = versionStr.split("\\.");
-            versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
-            versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
+        // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
+        String versionStr = FabdateUtil.getMinecraftVersion().getId();
+        String[] versionStrSplit = versionStr.split("\\.");
+        versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
+        versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
-            // Get entire json list of release info
-            JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
-            // Find newest release for MC version
-            ReleaseFile newestFile = null;
-            int date = 0;
-            for (JsonElement jsonElement : json1) {
-                ReleaseFile currentFile = new ReleaseFile(jsonElement.getAsJsonObject());
+        // Get entire json list of release info
+        JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
+        // Find newest release for MC version
+        ReleaseFile newestFile = null;
+        int date = 0;
+        for (JsonElement jsonElement : json1) {
+            ReleaseFile modFile = new ReleaseFile(jsonElement.getAsJsonObject());
 
-                String gameVersionsString = String.join(" ", currentFile.gameVersions); // states mc version, fabric, forge
-                // Skip if it contains forge and not fabric
-                if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
-                    continue;
-                }
-                // Allow if same MC version or if universal release
-                if (gameVersionsString.contains(versionStr) || currentFile.fileName.toLowerCase().contains("universal")) {
-                    // Format the date into an integer
-                    String[] fileDateSplit = currentFile.fileDate.split("-");
-                    fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
+            String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
+            // Skip if it contains forge and not fabric
+            if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
+                continue;
+            }
+            // Allow if same MC version or if universal release
+            if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
+                // Format the date into an integer
+                String[] fileDateSplit = modFile.fileDate.split("-");
+                fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
 
-                    // Compare release dates to get most recent mod version
-                    if (date == 0) {
-                        date = Integer.parseInt(String.join("", fileDateSplit));
-                        newestFile = currentFile;
-                    } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
-                        date = Integer.parseInt(String.join("", fileDateSplit));
-                        newestFile = currentFile;
-                    }
+                // Compare release dates to get most recent mod version
+                if (date == 0) {
+                    date = Integer.parseInt(String.join("", fileDateSplit));
+                    newestFile = modFile;
+                } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
+                    date = Integer.parseInt(String.join("", fileDateSplit));
+                    newestFile = modFile;
                 }
             }
-            // Get mod name
+
+        }
+        // Check if an update is needed
+        if (!currentMod.fileName.equals(newestFile.fileName)) {
+            // Get mod name + webpage
             JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             ModPage modPage = new ModPage(json2);
             ModPlatform.modName = modPage.name;
 
-            // Check if an update is needed
-            boolean upToDate = false;
-            for (File child : listDir) {
-                if (child.getName().equals(newestFile.fileName)) {
-                    upToDate = true;
-                    break;
-                }
-            }
-            if (!upToDate) {
-                FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
-            }
+            FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
         }
     }
 

@@ -13,7 +13,6 @@ public class ModPlatform {
 
     public static ServerCommandSource commandSource;
     public static String modName;
-    private static CurrentMod currentMod;
 
     public static void platformStart(ServerCommandSource cm) throws Exception {
         commandSource = cm;
@@ -24,7 +23,7 @@ public class ModPlatform {
         for (File modFile : filesList) {
             // Check if Modrinth mod
             String sh1 = Hash.getSH1(modFile);
-            currentMod = ModrinthUpdater.getCurrentMod(sh1);
+            CurrentMod currentMod = ModrinthUpdater.getCurrentMod(sh1);
 
             if (currentMod != null) {
                 ModrinthUpdater.start(currentMod);
@@ -38,12 +37,8 @@ public class ModPlatform {
                     // Get project ID
                     currentMod = CurseForgeUpdater.getCurrentMod(postResult);
                     CurseForgeUpdater.start(currentMod);
-
                 }
-
             }
-
         }
-
     }
 }
