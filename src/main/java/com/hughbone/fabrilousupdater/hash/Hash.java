@@ -8,9 +8,9 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Hashes {
+public class Hash {
 
-    public static float getMurmurHash(File file) throws IOException {
+    public static long getMurmurHash(File file) throws IOException {
         final int m = 0x5bd1e995;
         final int r = 24;
         long k = 0x0L;
@@ -123,8 +123,7 @@ public class Hashes {
             //convert the byte to hex format
             StringBuffer sb = new StringBuffer("");
             for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16)
-                        .substring(1));
+                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException | IOException ex) {
