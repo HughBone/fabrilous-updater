@@ -1,10 +1,9 @@
 package com.hughbone.fabrilousupdater.platform;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.hash.Hash;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
 
 
 import java.io.*;
@@ -39,6 +38,10 @@ public class ModPlatform {
                     CurseForgeUpdater.start(currentMod);
                 }
             }
+            if (currentMod == null) {
+                commandSource.sendFeedback(new LiteralText("[Error] Did not find " + modFile.getName() + " in Modrinth or CurseForge"), false);
+            }
+
         }
     }
 }
