@@ -2,6 +2,7 @@ package com.hughbone.fabrilousupdater.platform;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.hash.Hash;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -12,6 +13,7 @@ public class ModPlatform {
 
     public static ServerCommandSource commandSource;
     public static String modName;
+    private static CurrentMod currentMod;
 
     public static void platformStart(ServerCommandSource cm) throws Exception {
         commandSource = cm;
@@ -22,10 +24,10 @@ public class ModPlatform {
         for (File modFile : filesList) {
             // Check if Modrinth mod
             String sh1 = Hash.getSH1(modFile);
-            String projectID = ModrinthUpdater.getProjectID(sh1);
+            currentMod = ModrinthUpdater.getCurrentMod(sh1);
 
-            if (projectID != null) {
-                //ModrinthUpdater.start(projectID);
+            if (currentMod != null) {
+                ModrinthUpdater.start(currentMod);
             }
             // Check if CurseForge mod
             else {
@@ -34,14 +36,8 @@ public class ModPlatform {
 
                 if (postResult != null) {
                     // Get project ID
-                    try {
-                        JsonParser jp = new JsonParser();
-                        JsonObject jsonObject = jp.parse(postResult).getAsJsonObject();
-                        projectID = jsonObject.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("id").toString();
-
-                        //CurseForgeUpdater.start(projectID);
-
-                    } catch (Exception e){}
+                    currentMod = CurseForgeUpdater.getCurrentMod(postResult);
+                    CurseForgeUpdater.start(currentMod);
 
                 }
 

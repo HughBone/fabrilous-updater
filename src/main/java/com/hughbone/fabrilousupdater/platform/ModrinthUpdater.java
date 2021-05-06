@@ -3,6 +3,7 @@ package com.hughbone.fabrilousupdater.platform;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -46,15 +47,20 @@ public class ModrinthUpdater {
         }
     }
 
-    public static String getProjectID(String sh1Hash) {
+    public static CurrentMod getCurrentMod(String sh1Hash) {
         try {
             JsonObject json = FabdateUtil.getJsonObject("https://api.modrinth.com/api/v1/version_file/" + sh1Hash + "?algorithm=sha1");
-            return json.get("mod_id").toString().replace("\"", "");
-        } catch (Exception e) {}
+            final String fileName = json.get("files").getAsJsonArray().get(0).getAsJsonObject().get("filename").toString().replace("\"", "");
+            final String projectID = json.get("mod_id").toString().replace("\"", "");
+            CurrentMod currentMod = new CurrentMod(fileName, projectID);
+            return currentMod;
+        } catch (Exception e) {
+        }
+
         return null;
     }
 
-    public static void start(String pID) throws CommandSyntaxException {
+    public static void start(CurrentMod currentMod) throws CommandSyntaxException {
         // mods directory
         File dir = new File(System.getProperty("user.dir") + File.separator + "mods");
         File[] listDir = dir.listFiles();
@@ -66,7 +72,7 @@ public class ModrinthUpdater {
             versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
             // Get entire json list of release info
-            JsonArray json1 = FabdateUtil.getJsonArray(sURL + pID + "/version");
+            JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
             // Find newest release for MC version
             ReleaseFile newestFile = null;
             int date = 0;
@@ -95,7 +101,7 @@ public class ModrinthUpdater {
                 }
             }
             // Get mod name
-            JsonObject json2 = FabdateUtil.getJsonObject(sURL + pID);
+            JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             ModPage modPage = new ModPage(json2);
             ModPlatform.modName = modPage.name;
 

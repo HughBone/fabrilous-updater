@@ -3,6 +3,8 @@ package com.hughbone.fabrilousupdater.platform;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -44,6 +46,19 @@ public class CurseForgeUpdater {
         }
     }
 
+    public static CurrentMod getCurrentMod(String postResult) {
+        try {
+            JsonParser jp = new JsonParser();
+            JsonObject jsonObject = jp.parse(postResult).getAsJsonObject();
+            String fileName = jsonObject.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("file").getAsJsonObject().get("fileName").toString().replace("\"", "");
+            String projectID = jsonObject.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("id").toString();
+            CurrentMod currentMod = new CurrentMod(fileName, projectID);
+            return currentMod;
+        } catch (Exception e){}
+
+        return null;
+    }
+
     public static String sendPost(String murmurHash) throws Exception {
 
         String body = "[" + murmurHash + "]";
@@ -76,7 +91,7 @@ public class CurseForgeUpdater {
 
     }
 
-    public static void start(String pID) throws IOException, CommandSyntaxException {
+    public static void start(CurrentMod currentMod) throws CommandSyntaxException {
         // mods directory
         File dir = new File(System.getProperty("user.dir") + File.separator + "mods");
         File[] listDir = dir.listFiles();
@@ -88,7 +103,7 @@ public class CurseForgeUpdater {
             versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
             // Get entire json list of release info
-            JsonArray json1 = FabdateUtil.getJsonArray(sURL + pID + "/files");
+            JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
             // Find newest release for MC version
             CurseReleaseFile newestFile = null;
             int date = 0;
@@ -117,7 +132,7 @@ public class CurseForgeUpdater {
                 }
             }
             // Get mod name
-            JsonObject json2 = FabdateUtil.getJsonObject(sURL + pID);
+            JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             CurseModPage modPage = new CurseModPage(json2);
             ModPlatform.modName = modPage.name;
 
