@@ -6,8 +6,12 @@ import com.google.gson.JsonObject;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class CurseForgeUpdater {
@@ -39,6 +43,35 @@ public class CurseForgeUpdater {
             this.name = json.get("name").toString().replace("\"", "");
             this.websiteUrl = json.get("websiteUrl").toString().replace("\"", "");
         }
+    }
+
+    public static String sendPost(String murmurHash) throws Exception {
+
+        String body = "[" + murmurHash + "]";
+
+        HttpURLConnection urlConn;
+        URL mUrl = new URL("https://addons-ecs.forgesvc.net/api/v2/fingerprint");
+        urlConn = (HttpURLConnection) mUrl.openConnection();
+        urlConn.setDoOutput(true);
+
+        urlConn.addRequestProperty("Accept", "application/json");
+        urlConn.addRequestProperty("Content-Type", "application/json");
+        urlConn.addRequestProperty("Content-Type", "application/json");
+        urlConn.getOutputStream().write(body.getBytes("UTF8"));
+
+        StringBuilder content;
+        BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+        String line;
+        content = new StringBuilder();
+        while ((line = br.readLine()) != null) {
+            content.append(line);
+            content.append(System.lineSeparator());
+        }
+
+        urlConn.disconnect();
+
+        return content.toString();
+
     }
 
     public static void start(String pID) throws IOException, CommandSyntaxException {
