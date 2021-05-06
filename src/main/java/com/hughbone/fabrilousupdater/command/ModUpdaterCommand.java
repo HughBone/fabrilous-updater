@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import java.io.File;
 
 
 public class ModUpdaterCommand {
@@ -37,6 +38,12 @@ public class ModUpdaterCommand {
 
         public void run() {
             try {
+
+                String path = System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilousupdater.txt";
+                if (new File(path).isFile()) {
+                    source.sendFeedback(new LiteralText("[FabrilousUpdater] 'fabrilousupdater.txt' is no longer needed! You may delete it."), false);
+                }
+
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
                 ModPlatform.platformStart(source);
                 source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
