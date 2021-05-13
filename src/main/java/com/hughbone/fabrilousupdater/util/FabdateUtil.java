@@ -58,21 +58,6 @@ public class FabdateUtil {
         return jp.parse(jsonStr).getAsJsonObject();
     }
 
-    public static String urlToString(String urlStr) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        URL url = new URL(urlStr);
-
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append('\n');
-            }
-        }
-
-        return stringBuilder.toString();
-    }
-
     private static String getMinecraftSemanticVersion() {
         Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer("minecraft");
         if (mod.isPresent()) {
