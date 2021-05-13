@@ -104,7 +104,7 @@ public class Hash {
     }
 
 
-    public static String getSH1(File file) {
+    public static String getSHA1(File file) {
 
         // ex. --> String shString = getSHA1(new File("config/renammd.jar"));
 
@@ -126,7 +126,7 @@ public class Hash {
             for (int i = 0; i < mdbytes.length; i++) {
                 sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
             }
-            return sb.toString();
+            return sb.toString().toLowerCase();
         } catch (NoSuchAlgorithmException | IOException ex) {
             throw new RuntimeException(ex);
         }
