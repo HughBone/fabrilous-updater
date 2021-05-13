@@ -5,9 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 
 
@@ -22,16 +23,19 @@ public class ModrinthUpdater {
         private ArrayList<String> gameVersions = new ArrayList<>();
 
         ReleaseFile(JsonObject json) {
+            System.out.println(json.toString());
             this.fileDate = json.get("date_published").toString().replace("\"", "");
 
-            for (JsonElement j : json.getAsJsonArray("files")) {
+
+            final JsonArray filesArray =  json.getAsJsonArray("files");
+            for (JsonElement j : filesArray) {
                 this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");
                 ;
                 this.downloadUrl = j.getAsJsonObject().get("url").toString();
                 downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
             }
-
-            for (JsonElement j : json.getAsJsonArray("game_versions")) {
+            final JsonArray gameVerArray = json.getAsJsonArray("game_versions");
+            for (JsonElement j : gameVerArray) {
                 gameVersions.add(j.toString().replace("\"", ""));
             }
         }
@@ -70,7 +74,7 @@ public class ModrinthUpdater {
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
         // Find newest release for MC version
         ReleaseFile newestFile = null;
-        int date = 0;
+        FileTime newestDate = null;
         for (JsonElement jsonElement : json1) {
             ReleaseFile modFile = new ReleaseFile(jsonElement.getAsJsonObject());
 
@@ -81,20 +85,17 @@ public class ModrinthUpdater {
             }
             // Allow if same MC version or if universal release
             if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
-                // Format the date into an integer
-                String[] fileDateSplit = modFile.fileDate.split("-");
-                fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
-
                 // Compare release dates to get most recent mod version
-                if (date == 0) {
-                    date = Integer.parseInt(String.join("", fileDateSplit));
+                FileTime currentDate = FileTime.from(Instant.parse(modFile.fileDate));
+                if (newestDate == null) {
+                    newestDate = currentDate;
                     newestFile = modFile;
-                } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
-                    date = Integer.parseInt(String.join("", fileDateSplit));
+                }
+                else if (currentDate.compareTo(newestDate) > 0) {
+                    newestDate = currentDate;
                     newestFile = modFile;
                 }
             }
-
         }
         // Check if an update is needed
         if (!currentMod.fileName.equals(newestFile.fileName)) {

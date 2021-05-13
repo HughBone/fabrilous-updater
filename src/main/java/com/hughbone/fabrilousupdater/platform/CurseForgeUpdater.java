@@ -6,12 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.CurrentMod;
 import com.hughbone.fabrilousupdater.util.FabdateUtil;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 
 
@@ -26,11 +27,14 @@ public class CurseForgeUpdater {
         private ArrayList<String> gameVersions = new ArrayList<>();
 
         CurseReleaseFile(JsonObject json) {
+            System.out.println(json.toString());
             this.fileName = json.get("fileName").toString().replace("\"", "");
             this.fileDate = json.get("fileDate").toString().replace("\"", "");
             this.downloadUrl = json.get("downloadUrl").toString();
             downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
-            for (JsonElement j : json.getAsJsonArray("gameVersion")) {
+
+            JsonArray gameVerArray = json.getAsJsonArray("gameVersion");
+            for (JsonElement j : gameVerArray) {
                 gameVersions.add(j.toString().replace("\"", ""));
             }
         }
@@ -102,7 +106,7 @@ public class CurseForgeUpdater {
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
         // Find newest release for MC version
         CurseReleaseFile newestFile = null;
-        int date = 0;
+        FileTime newestDate = null;
         for (JsonElement jsonElement : json1) {
             CurseReleaseFile modFile = new CurseReleaseFile(jsonElement.getAsJsonObject());
 
@@ -113,16 +117,14 @@ public class CurseForgeUpdater {
             }
             // Allow if same MC version or if universal release
             if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
-                // Format the date into an integer
-                String[] fileDateSplit = modFile.fileDate.split("-");
-                fileDateSplit[2] = fileDateSplit[2].substring(0, 2);
-
                 // Compare release dates to get most recent mod version
-                if (date == 0) {
-                    date = Integer.parseInt(String.join("", fileDateSplit));
+                FileTime currentDate = FileTime.from(Instant.parse(modFile.fileDate));
+                if (newestDate == null) {
+                    newestDate = currentDate;
                     newestFile = modFile;
-                } else if (date < Integer.parseInt(String.join("", fileDateSplit))) {
-                    date = Integer.parseInt(String.join("", fileDateSplit));
+                }
+                else if (currentDate.compareTo(newestDate) > 0) {
+                    newestDate = currentDate;
                     newestFile = modFile;
                 }
             }
