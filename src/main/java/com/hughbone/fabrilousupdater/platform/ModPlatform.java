@@ -13,7 +13,7 @@ public class ModPlatform {
     public static ServerCommandSource commandSource;
     public static String modName;
 
-    public static void platformStart(ServerCommandSource cm) throws Exception {
+    public static void platformStart(ServerCommandSource cm) {
         commandSource = cm;
 
         // Search through all mods
@@ -22,7 +22,7 @@ public class ModPlatform {
         for (File modFile : filesList) {
             try {
                 // Check if Modrinth mod
-                String sh1 = Hash.getSH1(modFile);
+                String sh1 = Hash.getSHA1(modFile);
                 CurrentMod currentMod = ModrinthUpdater.getCurrentMod(sh1);
 
                 if (currentMod != null) {
