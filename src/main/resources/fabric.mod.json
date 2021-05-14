@@ -10,6 +10,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/fabrilous-updater",
+    "issues": "https://github.com/HughBone/fabrilous-updater/issues",
     "sources": "https://github.com/HughBone/fabrilous-updater"
   },
 
