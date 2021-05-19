@@ -134,9 +134,8 @@ public class CurseForgeUpdater {
             // Get mod name
             JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             CurseModPage modPage = new CurseModPage(json2);
-            ModPlatform.modName = modPage.name;
 
-            FabdateUtil.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
+            FabdateUtil.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 

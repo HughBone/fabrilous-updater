@@ -102,9 +102,8 @@ public class ModrinthUpdater {
             // Get mod name + webpage
             JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
             ModPage modPage = new ModPage(json2);
-            ModPlatform.modName = modPage.name;
 
-            FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, newestFile.fileName); // Sends update message to player
+            FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 

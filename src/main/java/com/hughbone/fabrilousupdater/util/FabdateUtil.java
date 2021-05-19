@@ -19,14 +19,13 @@ import java.util.Optional;
 
 public class FabdateUtil {
 
-    public static void sendMessage(String websiteUrl, String downloadUrl, String fileName) throws CommandSyntaxException {
+    public static void sendMessage(String websiteUrl, String downloadUrl, String modName) throws CommandSyntaxException {
         CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
 
-        String commandString = "tellraw $player [\"\",{\"text\":\"[Click Me] \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url1\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{\"text\":\"Update found: \"},{\"text\":\"$modname\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"$url2\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]";
-        commandString = commandString.replace("$player", ModPlatform.commandSource.getName());
-        commandString = commandString.replace("$url1", websiteUrl);
-        commandString = commandString.replace("$url2", downloadUrl);
-        commandString = commandString.replace("$modname", fileName);
+        String commandString = "tellraw " + ModPlatform.commandSource.getName() + " [\"\",{\"text\":\"" + modName + "  \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + websiteUrl + "\"}," +
+                "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{" +
+                "\"text\":\"has an \"},{\"text\":\"update.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + downloadUrl + "\"}," +
+                "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]";
 
         cm.getDispatcher().execute(commandString, ModPlatform.commandSource.getMinecraftServer().getCommandSource());
     }

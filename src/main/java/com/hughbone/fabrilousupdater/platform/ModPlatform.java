@@ -11,13 +11,12 @@ import java.io.*;
 public class ModPlatform {
 
     public static ServerCommandSource commandSource;
-    public static String modName;
 
     public static void platformStart(ServerCommandSource cm) {
         commandSource = cm;
 
         // Search through all mods
-        File directoryPath = new File("mods");
+        File directoryPath = new File("allthemods");
         File filesList[] = directoryPath.listFiles();
         for (File modFile : filesList) {
             try {
