@@ -16,7 +16,7 @@ public class ModPlatform {
         commandSource = cm;
 
         // Search through all mods
-        File directoryPath = new File("allthemods");
+        File directoryPath = new File("mods");
         File filesList[] = directoryPath.listFiles();
         for (File modFile : filesList) {
             try {
