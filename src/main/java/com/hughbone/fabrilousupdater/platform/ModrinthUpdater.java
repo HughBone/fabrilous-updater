@@ -21,7 +21,6 @@ public class ModrinthUpdater {
         private ArrayList<String> gameVersions = new ArrayList<>();
 
         MrReleaseFile(JsonObject json) {
-            System.out.println(json.toString());
             this.fileDate = json.get("date_published").toString().replace("\"", "");
 
 

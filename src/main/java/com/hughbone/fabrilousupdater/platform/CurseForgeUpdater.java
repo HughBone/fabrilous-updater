@@ -25,7 +25,6 @@ public class CurseForgeUpdater {
         private ArrayList<String> gameVersions = new ArrayList<>();
 
         CfReleaseFile(JsonObject json) {
-            System.out.println(json.toString());
             this.fileName = json.get("fileName").toString().replace("\"", "");
             this.fileDate = json.get("fileDate").toString().replace("\"", "");
             this.downloadUrl = json.get("downloadUrl").toString();
