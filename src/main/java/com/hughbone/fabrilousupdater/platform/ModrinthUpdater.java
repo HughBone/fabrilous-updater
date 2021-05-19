@@ -14,15 +14,13 @@ import java.util.ArrayList;
 
 public class ModrinthUpdater {
 
-    private static final String sURL = "https://api.modrinth.com/api/v1/mod/";
-
-    private static class ReleaseFile {
+    private static class MrReleaseFile {
         private String fileName;
         private String fileDate;
         private String downloadUrl;
         private ArrayList<String> gameVersions = new ArrayList<>();
 
-        ReleaseFile(JsonObject json) {
+        MrReleaseFile(JsonObject json) {
             System.out.println(json.toString());
             this.fileDate = json.get("date_published").toString().replace("\"", "");
 
@@ -64,6 +62,8 @@ public class ModrinthUpdater {
     }
 
     public static void start(CurrentMod currentMod) throws Exception {
+        final String sURL = "https://api.modrinth.com/api/v1/mod/";
+
         // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
         String versionStr = FabdateUtil.getMinecraftVersion().getId();
         String[] versionStrSplit = versionStr.split("\\.");
@@ -73,10 +73,10 @@ public class ModrinthUpdater {
         // Get entire json list of release info
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
         // Find newest release for MC version
-        ReleaseFile newestFile = null;
+        MrReleaseFile newestFile = null;
         FileTime newestDate = null;
         for (JsonElement jsonElement : json1) {
-            ReleaseFile modFile = new ReleaseFile(jsonElement.getAsJsonObject());
+            MrReleaseFile modFile = new MrReleaseFile(jsonElement.getAsJsonObject());
 
             String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
             // Skip if it contains forge and not fabric

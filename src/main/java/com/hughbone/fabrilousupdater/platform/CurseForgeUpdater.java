@@ -18,15 +18,13 @@ import java.util.ArrayList;
 
 public class CurseForgeUpdater {
 
-    private static final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
-
-    private static class CurseReleaseFile {
+    private static class CfReleaseFile {
         private String fileName;
         private String fileDate;
         private String downloadUrl;
         private ArrayList<String> gameVersions = new ArrayList<>();
 
-        CurseReleaseFile(JsonObject json) {
+        CfReleaseFile(JsonObject json) {
             System.out.println(json.toString());
             this.fileName = json.get("fileName").toString().replace("\"", "");
             this.fileDate = json.get("fileDate").toString().replace("\"", "");
@@ -96,6 +94,8 @@ public class CurseForgeUpdater {
     }
 
     public static void start(CurrentMod currentMod) throws Exception {
+        final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
+
         // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
         String versionStr = FabdateUtil.getMinecraftVersion().getId();
         String[] versionStrSplit = versionStr.split("\\.");
@@ -105,10 +105,10 @@ public class CurseForgeUpdater {
         // Get entire json list of release info
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
         // Find newest release for MC version
-        CurseReleaseFile newestFile = null;
+        CfReleaseFile newestFile = null;
         FileTime newestDate = null;
         for (JsonElement jsonElement : json1) {
-            CurseReleaseFile modFile = new CurseReleaseFile(jsonElement.getAsJsonObject());
+            CfReleaseFile modFile = new CfReleaseFile(jsonElement.getAsJsonObject());
 
             String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
             // Skip if it contains forge and not fabric
