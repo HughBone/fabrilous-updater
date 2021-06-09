@@ -66,7 +66,10 @@ public class ModrinthUpdater {
         // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
         String versionStr = FabdateUtil.getMinecraftVersion().getId();
         String[] versionStrSplit = versionStr.split("\\.");
-        versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
+        try {
+            versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
+        }
+        catch (IndexOutOfBoundsException e) {}
         versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
 
         // Get entire json list of release info
