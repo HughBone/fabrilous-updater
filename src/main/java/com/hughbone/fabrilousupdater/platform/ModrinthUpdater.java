@@ -23,7 +23,6 @@ public class ModrinthUpdater {
         MrReleaseFile(JsonObject json) {
             this.fileDate = json.get("date_published").toString().replace("\"", "");
 
-
             final JsonArray filesArray =  json.getAsJsonArray("files");
             for (JsonElement j : filesArray) {
                 this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");
@@ -63,14 +62,14 @@ public class ModrinthUpdater {
     public static void start(CurrentMod currentMod) throws Exception {
         final String sURL = "https://api.modrinth.com/api/v1/mod/";
 
-        // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
-        String versionStr = FabdateUtil.getMinecraftVersion().getId();
-        String[] versionStrSplit = versionStr.split("\\.");
-        try {
-            versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
-        }
-        catch (IndexOutOfBoundsException e) {}
-        versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
+        // Get mod name + webpage
+        JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
+        ModPage modPage = new ModPage(json2);
+        // send actionbar message
+        FabdateUtil.sendActionBar("Checking " + modPage.name + "..");
+
+        // Get Minecraft Version
+        String versionStr = FabdateUtil.getMinecraftVersion();
 
         // Get entire json list of release info
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
@@ -99,13 +98,9 @@ public class ModrinthUpdater {
                 }
             }
         }
-        // Check if an update is needed
+        // Send update message if an update is found
         if (!currentMod.fileName.equals(newestFile.fileName)) {
-            // Get mod name + webpage
-            JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
-            ModPage modPage = new ModPage(json2);
-
-            FabdateUtil.sendMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, modPage.name); // Sends update message to player
+            FabdateUtil.sendUpdateMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 

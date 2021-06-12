@@ -6,20 +6,34 @@ import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.platform.ModPlatform;
 import com.mojang.bridge.game.GameVersion;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.MinecraftVersion;
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.world.GameRules;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Optional;
 
 
 public class FabdateUtil {
 
-    public static void sendMessage(String websiteUrl, String downloadUrl, String modName) throws CommandSyntaxException {
+    public static void sendActionBar(String message) throws CommandSyntaxException {
+        // set command feedback to false
+        boolean sendCommandFB = ModPlatform.commandSource.getMinecraftServer().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK).get(); // original value
+        ModPlatform.commandSource.getMinecraftServer().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK).set(false, ModPlatform.commandSource.getMinecraftServer());
+        // send message
+        CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
+        message = message.replace("(fabric)", "");
+        message = message.replace("(Fabric)", "");
+        message = "title " + ModPlatform.commandSource.getPlayer().getEntityName() + " actionbar {\"text\":\"" + message + "\"}";
+        cm.getDispatcher().execute(message, ModPlatform.commandSource.getMinecraftServer().getCommandSource());
+        // reset command feedback
+        ModPlatform.commandSource.getMinecraftServer().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK).set(sendCommandFB, ModPlatform.commandSource.getMinecraftServer());
+    }
+
+
+    public static void sendUpdateMessage(String websiteUrl, String downloadUrl, String modName) throws CommandSyntaxException {
         CommandManager cm = new CommandManager(CommandManager.RegistrationEnvironment.ALL);
 
         String commandString = "tellraw " + ModPlatform.commandSource.getName() + " [\"\",{\"text\":\"" + modName + "  \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + websiteUrl + "\"}," +
@@ -57,30 +71,16 @@ public class FabdateUtil {
         return jp.parse(jsonStr).getAsJsonObject();
     }
 
-    private static String getMinecraftSemanticVersion() {
-        Optional<ModContainer> mod = FabricLoader.getInstance().getModContainer("minecraft");
-        if (mod.isPresent()) {
-            return mod.get().getMetadata().getVersion().getFriendlyString();
-        } else {
-            return "";
+    public static String getMinecraftVersion() {
+        GameVersion minecraftVersion = MinecraftVersion.create();
+        // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
+        String versionStr = minecraftVersion.getId();
+        String[] versionStrSplit = versionStr.split("\\.");
+        try {
+            versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
         }
+        catch (IndexOutOfBoundsException e) {}
+        versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
+        return versionStr;
     }
-
-    private static String minecraftVersionSemantic = null;
-    private static GameVersion minecraftVersion = null;
-
-    private static void updateMinecraftVersion() {
-        if (minecraftVersionSemantic == null) {
-            minecraftVersionSemantic = getMinecraftSemanticVersion();
-        }
-        if (minecraftVersion == null) {
-            minecraftVersion = MinecraftVersion.create();
-        }
-    }
-
-    public static GameVersion getMinecraftVersion() {
-        updateMinecraftVersion();
-        return minecraftVersion;
-    }
-
 }

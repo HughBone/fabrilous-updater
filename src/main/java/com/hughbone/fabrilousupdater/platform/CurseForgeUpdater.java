@@ -95,11 +95,14 @@ public class CurseForgeUpdater {
     public static void start(CurrentMod currentMod) throws Exception {
         final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
 
-        // remove last decimal in MC version (ex. 1.16.5 --> 1.16)
-        String versionStr = FabdateUtil.getMinecraftVersion().getId();
-        String[] versionStrSplit = versionStr.split("\\.");
-        versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
-        versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
+        // Get mod name
+        JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
+        CurseModPage modPage = new CurseModPage(json2);
+        // send actionbar message
+        FabdateUtil.sendActionBar("Checking " + modPage.name + "..");
+
+        // Get Minecraft Version
+        String versionStr = FabdateUtil.getMinecraftVersion();
 
         // Get entire json list of release info
         JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
@@ -130,11 +133,7 @@ public class CurseForgeUpdater {
         }
 
         if (!currentMod.fileName.equals(newestFile.fileName)) {
-            // Get mod name
-            JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
-            CurseModPage modPage = new CurseModPage(json2);
-
-            FabdateUtil.sendMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, modPage.name); // Sends update message to player
+            FabdateUtil.sendUpdateMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 
