@@ -1,6 +1,7 @@
 package com.hughbone.fabrilousupdater.platform;
 
 import com.hughbone.fabrilousupdater.CurrentMod;
+import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.hughbone.fabrilousupdater.util.Hash;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -18,7 +19,23 @@ public class ModPlatform {
         // Search through all mods
         File directoryPath = new File("mods");
         File filesList[] = directoryPath.listFiles();
+        outer:
         for (File modFile : filesList) {
+
+            // Skip mod if ignored
+            try {
+                String line = "";
+                BufferedReader file = new BufferedReader(
+                        new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+                while ((line = file.readLine()) != null) {
+                    if (modFile.getName().equals(line)) {
+                        System.out.println("skipped: " + modFile.getName());
+                        continue outer;
+                    }
+                }
+            } catch (IOException e) {}
+
+            // Check for updates
             try {
                 // Check if Modrinth mod
                 String sh1 = Hash.getSHA1(modFile);
@@ -46,5 +63,6 @@ public class ModPlatform {
             }
 
         }
+        FabUtil.sendActionBar("Finished!");
     }
 }
