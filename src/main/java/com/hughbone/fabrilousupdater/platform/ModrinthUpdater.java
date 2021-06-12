@@ -4,8 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.hughbone.fabrilousupdater.CurrentMod;
-import com.hughbone.fabrilousupdater.util.FabdateUtil;
-import org.apache.commons.lang3.ArrayUtils;
+import com.hughbone.fabrilousupdater.util.FabUtil;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
@@ -49,7 +48,7 @@ public class ModrinthUpdater {
 
     public static CurrentMod getCurrentMod(String sh1Hash) {
         try {
-            JsonObject json = FabdateUtil.getJsonObject("https://api.modrinth.com/api/v1/version_file/" + sh1Hash + "?algorithm=sha1");
+            JsonObject json = FabUtil.getJsonObject("https://api.modrinth.com/api/v1/version_file/" + sh1Hash + "?algorithm=sha1");
             final String fileName = json.get("files").getAsJsonArray().get(0).getAsJsonObject().get("filename").toString().replace("\"", "");
             final String projectID = json.get("mod_id").toString().replace("\"", "");
             CurrentMod currentMod = new CurrentMod(fileName, projectID);
@@ -63,16 +62,16 @@ public class ModrinthUpdater {
         final String sURL = "https://api.modrinth.com/api/v1/mod/";
 
         // Get mod name + webpage
-        JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
+        JsonObject json2 = FabUtil.getJsonObject(sURL + currentMod.projectID);
         ModPage modPage = new ModPage(json2);
         // send actionbar message
-        FabdateUtil.sendActionBar("Checking " + modPage.name + "..");
+        FabUtil.sendActionBar("Checking " + modPage.name + "..");
 
         // Get Minecraft Version
-        String versionStr = FabdateUtil.getMinecraftVersion();
+        String versionStr = FabUtil.getMinecraftVersion();
 
         // Get entire json list of release info
-        JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/version");
+        JsonArray json1 = FabUtil.getJsonArray(sURL + currentMod.projectID + "/version");
         // Find newest release for MC version
         MrReleaseFile newestFile = null;
         FileTime newestDate = null;
@@ -100,7 +99,7 @@ public class ModrinthUpdater {
         }
         // Send update message if an update is found
         if (!currentMod.fileName.equals(newestFile.fileName)) {
-            FabdateUtil.sendUpdateMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, modPage.name); // Sends update message to player
+            FabUtil.sendUpdateMessage(modPage.websiteUrl + "/versions", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 

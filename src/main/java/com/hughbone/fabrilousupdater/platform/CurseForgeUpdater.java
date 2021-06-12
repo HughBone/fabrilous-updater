@@ -5,8 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.CurrentMod;
-import com.hughbone.fabrilousupdater.util.FabdateUtil;
-import org.apache.commons.lang3.ArrayUtils;
+import com.hughbone.fabrilousupdater.util.FabUtil;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -96,16 +95,16 @@ public class CurseForgeUpdater {
         final String sURL = "https://addons-ecs.forgesvc.net/api/v2/addon/";
 
         // Get mod name
-        JsonObject json2 = FabdateUtil.getJsonObject(sURL + currentMod.projectID);
+        JsonObject json2 = FabUtil.getJsonObject(sURL + currentMod.projectID);
         CurseModPage modPage = new CurseModPage(json2);
         // send actionbar message
-        FabdateUtil.sendActionBar("Checking " + modPage.name + "..");
+        FabUtil.sendActionBar("Checking " + modPage.name + "..");
 
         // Get Minecraft Version
-        String versionStr = FabdateUtil.getMinecraftVersion();
+        String versionStr = FabUtil.getMinecraftVersion();
 
         // Get entire json list of release info
-        JsonArray json1 = FabdateUtil.getJsonArray(sURL + currentMod.projectID + "/files");
+        JsonArray json1 = FabUtil.getJsonArray(sURL + currentMod.projectID + "/files");
         // Find newest release for MC version
         CfReleaseFile newestFile = null;
         FileTime newestDate = null;
@@ -133,7 +132,7 @@ public class CurseForgeUpdater {
         }
 
         if (!currentMod.fileName.equals(newestFile.fileName)) {
-            FabdateUtil.sendUpdateMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, modPage.name); // Sends update message to player
+            FabUtil.sendUpdateMessage(modPage.websiteUrl + "/files", newestFile.downloadUrl, modPage.name); // Sends update message to player
         }
     }
 
