@@ -38,7 +38,6 @@ public class ModUpdaterCommand {
 
         public void run() {
             try {
-
                 String path = System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilousupdater.txt";
                 if (new File(path).isFile()) {
                     source.sendFeedback(new LiteralText("[FabrilousUpdater] 'fabrilousupdater.txt' is no longer needed! You may delete it."), false);
