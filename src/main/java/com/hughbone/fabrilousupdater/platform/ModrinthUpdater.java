@@ -18,20 +18,30 @@ public class ModrinthUpdater {
         private String fileDate;
         private String downloadUrl;
         private ArrayList<String> gameVersions = new ArrayList<>();
+        boolean isFabric = false;
 
         MrReleaseFile(JsonObject json) {
-            this.fileDate = json.get("date_published").toString().replace("\"", "");
-
-            final JsonArray filesArray =  json.getAsJsonArray("files");
-            for (JsonElement j : filesArray) {
-                this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");
-                ;
-                this.downloadUrl = j.getAsJsonObject().get("url").toString();
-                downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
+            final JsonArray loadersArray = json.getAsJsonArray("loaders");
+            for (JsonElement j : loadersArray) {
+                if (j.getAsJsonPrimitive().getAsString().contains("fabric")) {
+                    isFabric = true;
+                    break;
+                }
             }
-            final JsonArray gameVerArray = json.getAsJsonArray("game_versions");
-            for (JsonElement j : gameVerArray) {
-                gameVersions.add(j.toString().replace("\"", ""));
+            if (isFabric) {
+                this.fileDate = json.get("date_published").toString().replace("\"", "");
+
+                final JsonArray filesArray =  json.getAsJsonArray("files");
+                for (JsonElement j : filesArray) {
+                    this.fileName = j.getAsJsonObject().get("filename").toString().replace("\"", "");
+                    this.downloadUrl = j.getAsJsonObject().get("url").toString();
+                    downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
+                }
+
+                final JsonArray gameVerArray = json.getAsJsonArray("game_versions");
+                for (JsonElement j : gameVerArray) {
+                    gameVersions.add(j.toString().replace("\"", ""));
+                }
             }
         }
     }
@@ -78,12 +88,12 @@ public class ModrinthUpdater {
         for (JsonElement jsonElement : json1) {
             MrReleaseFile modFile = new MrReleaseFile(jsonElement.getAsJsonObject());
 
-            String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
             // Skip if it contains forge and not fabric
-            if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
+            if (!modFile.isFabric) {
                 continue;
             }
             // Allow if same MC version or if universal release
+            String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
             if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
                 // Compare release dates to get most recent mod version
                 FileTime currentDate = FileTime.from(Instant.parse(modFile.fileDate));

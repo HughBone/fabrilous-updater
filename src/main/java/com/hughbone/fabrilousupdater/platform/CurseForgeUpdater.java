@@ -22,16 +22,27 @@ public class CurseForgeUpdater {
         private String fileDate;
         private String downloadUrl;
         private ArrayList<String> gameVersions = new ArrayList<>();
+        private boolean isFabric = false;
 
         CfReleaseFile(JsonObject json) {
-            this.fileName = json.get("fileName").toString().replace("\"", "");
-            this.fileDate = json.get("fileDate").toString().replace("\"", "");
-            this.downloadUrl = json.get("downloadUrl").toString();
-            downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
+            JsonArray modulesArray = json.getAsJsonArray("modules");
+            for (JsonElement j : modulesArray) {
+                if (j.getAsJsonObject().get("foldername").getAsString().equals("fabric.mod.json")) {
+                    isFabric = true;
+                    break;
+                }
+            }
 
-            JsonArray gameVerArray = json.getAsJsonArray("gameVersion");
-            for (JsonElement j : gameVerArray) {
-                gameVersions.add(j.toString().replace("\"", ""));
+            if (isFabric) {
+                this.fileName = json.get("fileName").toString().replace("\"", "");
+                this.fileDate = json.get("fileDate").toString().replace("\"", "");
+                this.downloadUrl = json.get("downloadUrl").toString();
+                downloadUrl = downloadUrl.substring(1, downloadUrl.length() - 1);
+
+                JsonArray gameVerArray = json.getAsJsonArray("gameVersion");
+                for (JsonElement j : gameVerArray) {
+                    gameVersions.add(j.toString().replace("\"", ""));
+                }
             }
         }
     }
@@ -111,12 +122,12 @@ public class CurseForgeUpdater {
         for (JsonElement jsonElement : json1) {
             CfReleaseFile modFile = new CfReleaseFile(jsonElement.getAsJsonObject());
 
-            String gameVersionsString = String.join(" ", modFile.gameVersions); // states mc version, fabric, forge
             // Skip if it contains forge and not fabric
-            if (gameVersionsString.toLowerCase().contains("forge") && !gameVersionsString.toLowerCase().contains("fabric")) {
+            if (!modFile.isFabric) {
                 continue;
             }
             // Allow if same MC version or if universal release
+            String gameVersionsString = String.join(" ", modFile.gameVersions); // get versions
             if (gameVersionsString.contains(versionStr) || modFile.fileName.toLowerCase().contains("universal")) {
                 // Compare release dates to get most recent mod version
                 FileTime currentDate = FileTime.from(Instant.parse(modFile.fileDate));
