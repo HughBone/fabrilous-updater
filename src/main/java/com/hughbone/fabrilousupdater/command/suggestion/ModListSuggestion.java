@@ -13,7 +13,7 @@ public class ModListSuggestion implements SuggestionProvider<ServerCommandSource
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
         // Search through all mods
-        File directoryPath = new File("allthemods");
+        File directoryPath = new File("mods");
         File filesList[] = directoryPath.listFiles();
         for (File modFile : filesList) {
             builder.suggest(modFile.getName());
