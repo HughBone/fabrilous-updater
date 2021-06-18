@@ -37,7 +37,10 @@ public class IgnoreCommand {
         if (!isDedicated || ctx.getSource().hasPermissionLevel(4)) {
             // get just the mod from input
             String modInput = "";
-            if (!(option == 3)) {
+            if (option == 3) {
+                ctx.getSource().sendFeedback(new LiteralText("[Fabrilous Updater] Ignore List:"), false);
+            }
+            else {
                 try {
                     if (option == 1) {
                         modInput = ctx.getInput().substring(19);
@@ -94,6 +97,7 @@ public class IgnoreCommand {
             } catch (IOException e) {}
 
             if (option == 3) {
+                ctx.getSource().sendFeedback(new LiteralText(""), false);
                 return 1;
             }
             else {
