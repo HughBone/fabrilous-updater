@@ -45,7 +45,8 @@ public class ReleaseFile {
 
                 final JsonArray filesArray =  json.getAsJsonArray("files");
                 for (JsonElement j : filesArray) {
-                    if (!j.getAsJsonObject().get("filename").getAsString().contains("-sources")) {  // If multiple files uploaded, get rid of imposter ones
+                    String tempFile = j.getAsJsonObject().get("filename").getAsString();
+                    if (!tempFile.contains("-sources") && !tempFile.contains("-dev")) {  // If multiple files uploaded, get rid of imposter ones
                         this.fileName = j.getAsJsonObject().get("filename").getAsString();
                         this.downloadUrl = j.getAsJsonObject().get("url").getAsString();
                         break;

@@ -5,6 +5,7 @@ import com.hughbone.fabrilousupdater.command.suggestion.ModListSuggestion;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -31,14 +32,14 @@ public class IgnoreCommand {
 
     }
 
-    private int execute(int option, CommandContext<ServerCommandSource> ctx, boolean isDedicated) {
+    private int execute(int option, CommandContext<ServerCommandSource> ctx, boolean isDedicated) throws CommandSyntaxException {
         // Option: (1=add, 2=remove, 3=list)
 
         if (!isDedicated || ctx.getSource().hasPermissionLevel(4)) {
             // get just the mod from input
             String modInput = "";
             if (option == 3) {
-                ctx.getSource().sendFeedback(new LiteralText("[Fabrilous Updater] Ignore List:"), false);
+                ctx.getSource().getPlayer().sendMessage(new LiteralText("[Fabrilous Updater] Ignore List:"), false);
             }
             else {
                 try {
@@ -90,14 +91,14 @@ public class IgnoreCommand {
                         }
                     }
                     else if (option == 3) {
-                        ctx.getSource().sendFeedback(new LiteralText(line), false);
+                        ctx.getSource().getPlayer().sendMessage(new LiteralText(line), false);
                     }
                 }
                 file.close();
             } catch (IOException e) {}
 
             if (option == 3) {
-                ctx.getSource().sendFeedback(new LiteralText(""), false);
+                ctx.getSource().getPlayer().sendMessage(new LiteralText(""), false);
                 return 1;
             }
             else {
@@ -110,11 +111,11 @@ public class IgnoreCommand {
             }
             // Success messages
             if (option == 1) {
-                ctx.getSource().sendFeedback(new LiteralText("Successfully added " + modInput + " to ignore list."), false);
+                ctx.getSource().getPlayer().sendMessage(new LiteralText("Successfully added " + modInput + " to ignore list."), false);
             }
             else if (option == 2) {
                 if (isRemoved) {
-                    ctx.getSource().sendFeedback(new LiteralText("Successfully removed " + modInput + " from ignore list.") , false);
+                    ctx.getSource().getPlayer().sendMessage(new LiteralText("Successfully removed " + modInput + " from ignore list.") , false);
                 }
                 else {
                     ctx.getSource().sendError(new LiteralText("[Error] " + modInput + " is not in ignore list."));
@@ -123,7 +124,7 @@ public class IgnoreCommand {
             return 1;
         }
         else {
-            ctx.getSource().sendFeedback(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
+            ctx.getSource().getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
             return 0;
         }
 

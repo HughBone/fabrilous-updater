@@ -3,6 +3,7 @@ package com.hughbone.fabrilousupdater.platform;
 import com.google.gson.JsonArray;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.hughbone.fabrilousupdater.util.Hash;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 
@@ -13,7 +14,7 @@ public class ModPlatform {
 
     public static ServerCommandSource commandSource;
 
-    public static void platformStart(ServerCommandSource cm) {
+    public static void platformStart(ServerCommandSource cm) throws CommandSyntaxException {
         commandSource = cm;
 
         // Search through all mods
@@ -67,11 +68,11 @@ public class ModPlatform {
                         }
                     }
                     if (currentMod.modName == null) {
-                        commandSource.sendFeedback(new LiteralText("[Error] '" + modFile.getName() + "' not found in Modrinth or CurseForge"), false);
+                        commandSource.getPlayer().sendMessage(new LiteralText("[Error] '" + modFile.getName() + "' not found in Modrinth or CurseForge"), false);
                     }
 
                 } catch (Exception e) {
-                    commandSource.sendFeedback(new LiteralText("[Error] '" + modFile.getName() + "' not found in Modrinth or CurseForge"), false);
+                    commandSource.getPlayer().sendMessage(new LiteralText("[Error] '" + modFile.getName() + "' not found in Modrinth or CurseForge"), false);
                 }
             }
         }

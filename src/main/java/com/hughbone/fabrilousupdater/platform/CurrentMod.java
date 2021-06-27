@@ -10,7 +10,7 @@ public class CurrentMod {
     public String modName;
     public String websiteUrl;
 
-    CurrentMod(String hashOrResult, String platform) throws Exception {
+    CurrentMod(String hashOrResult, String platform) {
         try {
             if (platform.equals("curseforge")) {
                 JsonParser jp = new JsonParser();

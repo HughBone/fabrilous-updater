@@ -21,7 +21,7 @@ public class ModUpdaterCommand {
                         new ListThread(context.getSource()).start();
                     }
                     else {
-                        context.getSource().sendFeedback(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
+                        context.getSource().getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
                     }
                     return 1;
                 }))
@@ -40,12 +40,12 @@ public class ModUpdaterCommand {
             try {
                 String path = System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilousupdater.txt";
                 if (new File(path).isFile()) {
-                    source.sendFeedback(new LiteralText("[FabrilousUpdater] 'fabrilousupdater.txt' is no longer needed! You may delete it."), false);
+                    source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] 'fabrilousupdater.txt' is no longer needed! You may delete it."), false);
                 }
 
-                source.sendFeedback(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
+                source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
                 ModPlatform.platformStart(source);
-                source.sendFeedback(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
+                source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
             } catch (Exception e) {
             }
         }
