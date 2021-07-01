@@ -1,52 +1,69 @@
 package com.hughbone.fabrilousupdater.command;
 
 import com.hughbone.fabrilousupdater.platform.ModPlatform;
+
+import com.hughbone.fabrilousupdater.util.FabUtil;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import java.io.File;
+import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
 
 
 public class ModUpdaterCommand {
 
-    public static void register() {
+    public void register(String env) {
+        if (env.equals("CLIENT")) {
+            registerClient();
+        }
+        else {
+            registerServer();
+        }
+    }
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdate")
-                .then(CommandManager.literal("update").executes(context -> {
-                    if (!isDedicated) {
-                        new ListThread(context.getSource()).start();
-                    }
-                    else if (context.getSource().hasPermissionLevel(4)) {
-                        new ListThread(context.getSource()).start();
-                    }
-                    else {
-                        context.getSource().getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
-                    }
+    private void registerClient() {
+        ClientCommandManager.DISPATCHER.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fabdate")
+                .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("update").executes(ctx -> {
+                            PlayerEntity player = ClientPlayerHack.getPlayer(ctx);
+                            if (FabUtil.modPresentOnServer && player.hasPermissionLevel(4)) {
+                                player.sendMessage(new LiteralText("Note: Use '/fabdateserver update' for server mods folder.").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), false);
+                            }
+                            new StartThread(player).start();
+                            return 1;
+                        })
+                ));
+    }
+
+    private void registerServer() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
+                .then(CommandManager.literal("update").executes(ctx -> {
+                        new StartThread(ctx.getSource().getPlayer()).start();
                     return 1;
                 }))
         ));
+
     }
 
-    private static class ListThread extends Thread{
+    public class StartThread extends Thread {
 
-        private ServerCommandSource source;
+        PlayerEntity player;
 
-        public ListThread(ServerCommandSource source) {
-            this.source = source;
+        public StartThread(PlayerEntity player) {
+            this.player = player;
         }
 
         public void run() {
             try {
-                String path = System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilousupdater.txt";
-                if (new File(path).isFile()) {
-                    source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] 'fabrilousupdater.txt' is no longer needed! You may delete it."), false);
-                }
+                player.sendMessage(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
+                new ModPlatform().start(player);
+                player.sendMessage(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
 
-                source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
-                ModPlatform.platformStart(source);
-                source.getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

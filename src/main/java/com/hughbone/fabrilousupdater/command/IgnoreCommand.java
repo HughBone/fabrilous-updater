@@ -1,132 +1,179 @@
 package com.hughbone.fabrilousupdater.command;
 
-import com.hughbone.fabrilousupdater.command.suggestion.IgnoreListSuggestion;
-import com.hughbone.fabrilousupdater.command.suggestion.ModListSuggestion;
+import com.hughbone.fabrilousupdater.command.suggestion.IgnoreListClient;
+import com.hughbone.fabrilousupdater.command.suggestion.IgnoreListServer;
+import com.hughbone.fabrilousupdater.command.suggestion.ModListClient;
+import com.hughbone.fabrilousupdater.command.suggestion.ModListServer;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class IgnoreCommand {
 
-    public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdate")
+    public void register(String env) {
+        if (env.equals("CLIENT")) {
+            registerClient();
+        } else {
+            registerServer();
+        }
+
+        removeDeletedMods(); // Remove from ignore list if not found in mods directory
+    }
+
+    private void registerClient() {
+        ClientCommandManager.DISPATCHER.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fabdate")
+                .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("ignore")
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("add").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(new ModListClient()).executes(ctx -> {
+                            return execute(1, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
+                        })))
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("remove").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(new IgnoreListClient()).executes(ctx -> {
+                            return execute(2, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
+                        })))
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("list").executes((ctx) -> {
+                            return execute(3, null, ClientPlayerHack.getPlayer(ctx));
+                        }))
+                )
+        );
+    }
+
+    private void registerServer() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.literal("ignore")
-                        .then(CommandManager.literal("add").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(new ModListSuggestion()).executes((ctx) -> {
-                            return execute(1, ctx, isDedicated);
-                        }))))
-                        .then(CommandManager.literal("remove").then((CommandManager.argument("ignore_list", StringArgumentType.word()).suggests(new IgnoreListSuggestion()).executes((ctx) -> {
-                            return execute(2, ctx, isDedicated);
+                        .then(CommandManager.literal("add").then(CommandManager.argument("mod", StringArgumentType.word()).suggests(new ModListServer()).executes((ctx) -> {
+                            return execute(1, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
+                        })))
+                        .then(CommandManager.literal("remove").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(new IgnoreListServer()).executes((ctx) -> {
+                            return execute(2, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
                         }))))
                         .then(CommandManager.literal("list").executes((ctx) -> {
-                            return execute(3, ctx, isDedicated);
+                            return execute(3, null, ctx.getSource().getPlayer());
                         }))
-
-        )));
-
+                )
+        ));
     }
 
-    private int execute(int option, CommandContext<ServerCommandSource> ctx, boolean isDedicated) throws CommandSyntaxException {
-        // Option: (1=add, 2=remove, 3=list)
+    private void removeDeletedMods() {
+        // Remove from ignore list if mod is deleted
+        FabUtil.createConfigFiles();
+        try {
+            File modsPath = new File("mods");
+            File modList[] = modsPath.listFiles();
+            BufferedReader file = new BufferedReader(
+                    new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
 
-        if (!isDedicated || ctx.getSource().hasPermissionLevel(4)) {
-            // get just the mod from input
-            String modInput = "";
-            if (option == 3) {
-                ctx.getSource().getPlayer().sendMessage(new LiteralText("[Fabrilous Updater] Ignore List:"), false);
-            }
-            else {
-                try {
-                    if (option == 1) {
-                        modInput = ctx.getInput().substring(19);
-                    }
-                    else if (option == 2) {
-                        modInput = ctx.getInput().substring(22);
-                    }
-                    // Remove spaces at the start of the string
-                    while (Character.toString(modInput.charAt(0)).equals(" ")) {
-                        modInput = modInput.substring(1);
-                    }
-                    // Remove spaces at the end of the string
-                    while (Character.toString(modInput.charAt(modInput.length()-1)).equals(" ")) {
-                        modInput = modInput.substring(0, modInput.length() - 1);
-                    }
-                } catch (IndexOutOfBoundsException e) {}
-            }
-
-            FabUtil.createConfigFiles(); // Make sure ignore config file exists
+            List<String> goodLines = new ArrayList<>();
             String line;
-            StringBuilder newFile = new StringBuilder();
-            boolean isRemoved = false;
-            if (option == 1) {
-                newFile.append(modInput + "\n");
-            }
-            try {
-                BufferedReader file = new BufferedReader(
-                        new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+            boolean modDeleted = false;
+            while ((line = file.readLine()) != null) {
+                boolean modExists = false;
 
-                while ((line = file.readLine()) != null) {
-                    if (option == 1) {
-                        if (line.equals(modInput)) {
-                            ctx.getSource().sendError(new LiteralText("[Error] " + modInput + " is already in ignore list."));
-                            file.close();
-                            return 0;
+                for (File modFile : modList) {
+                    if (modFile.getName().contains(".jar")) {
+                        if (modFile.getName().equals(line)) {
+                            modExists = true;
+                            break;
                         }
-                        else {
-                            newFile.append(line + "\n");
-                        }
-                    }
-                    else if (option == 2) {
-                        if (!line.equals(modInput)) {
-                            newFile.append(line + "\n");
-                        }
-                        else {
-                            isRemoved = true;
-                        }
-                    }
-                    else if (option == 3) {
-                        ctx.getSource().getPlayer().sendMessage(new LiteralText(line), false);
                     }
                 }
-                file.close();
-            } catch (IOException e) {}
 
-            if (option == 3) {
-                ctx.getSource().getPlayer().sendMessage(new LiteralText(""), false);
-                return 1;
-            }
-            else {
-                try {
-                    BufferedWriter file = new BufferedWriter(
-                            new FileWriter(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
-                    file.write(newFile.toString());
-                    file.close();
-                } catch (IOException e) {}
-            }
-            // Success messages
-            if (option == 1) {
-                ctx.getSource().getPlayer().sendMessage(new LiteralText("Successfully added " + modInput + " to ignore list."), false);
-            }
-            else if (option == 2) {
-                if (isRemoved) {
-                    ctx.getSource().getPlayer().sendMessage(new LiteralText("Successfully removed " + modInput + " from ignore list.") , false);
+                if (modExists) {
+                    goodLines.add(line);
                 }
                 else {
-                    ctx.getSource().sendError(new LiteralText("[Error] " + modInput + " is not in ignore list."));
+                    modDeleted = true;
                 }
             }
-            return 1;
-        }
-        else {
-            ctx.getSource().getPlayer().sendMessage(new LiteralText("[FabrilousUpdater] You need OP to use this command on servers."), false);
-            return 0;
+            file.close();
+
+            if (modDeleted) {
+                BufferedWriter writeFile = new BufferedWriter(
+                        new FileWriter(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+
+                for (String writeLine : goodLines) {
+                    writeFile.write(writeLine + "\n");
+                }
+                writeFile.close();
+            }
+
+        } catch (IOException e) {}
+    }
+
+
+    private int execute(int option, String modInput, PlayerEntity player) {  // Option: (1=add, 2=remove, 3=list)
+        // get just the mod from input
+        if (option == 3) {
+            player.sendMessage(new LiteralText("[Fabrilous Updater] Ignore List:").setStyle(Style.EMPTY.withColor(Formatting.GRAY)), false);
         }
 
+        FabUtil.createConfigFiles(); // Make sure ignore config file exists
+        String line;
+        StringBuilder newFile = new StringBuilder();
+        boolean isRemoved = false;
+        if (option == 1) {
+            newFile.append(modInput + "\n");
+        }
+        try {
+            BufferedReader file = new BufferedReader(
+                    new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+
+            while ((line = file.readLine()) != null) {
+                if (option == 1) {
+                    if (line.equals(modInput)) {
+                        player.sendMessage(new LiteralText("[Error] " + modInput + " is already in ignore list.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+                        file.close();
+                        return 0;
+                    } else {
+                        newFile.append(line + "\n");
+                    }
+                } else if (option == 2) {
+                    if (!line.equals(modInput)) {
+                        newFile.append(line + "\n");
+                    } else {
+                        isRemoved = true;
+                    }
+                } else if (option == 3) {
+                    player.sendMessage(new LiteralText(line), false);
+                }
+            }
+            file.close();
+        } catch (IOException e) {}
+
+        if (option == 3) {
+            player.sendMessage(new LiteralText(""), false);
+            return 1;
+        } else {
+            try {
+                BufferedWriter file = new BufferedWriter(
+                        new FileWriter(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+                file.write(newFile.toString());
+                file.close();
+            } catch (IOException e) {}
+        }
+        // Success messages
+        if (option == 1) {
+            player.sendMessage(new LiteralText("Added " + modInput + " to ignore list."), false);
+        } else if (option == 2) {
+            if (isRemoved) {
+                player.sendMessage(new LiteralText("Removed " + modInput + " from ignore list."), false);
+            } else {
+                player.sendMessage(new LiteralText("[Error] " + modInput + " is not in ignore list.").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+            }
+        }
+        return 1;
     }
+
 }

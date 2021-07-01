@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 
+
 public class CurrentMod {
     public String projectID;
     public String fileDate;
@@ -21,7 +22,7 @@ public class CurrentMod {
 
                 json = FabUtil.getJsonObject("https://addons-ecs.forgesvc.net/api/v2/addon/" + projectID);
                 modName = json.get("name").getAsString();
-                websiteUrl = json.get("websiteUrl").getAsString();
+                websiteUrl = json.get("websiteUrl").getAsString() + "/files";
             }
 
             else if (platform.equals("modrinth")) {
@@ -32,10 +33,12 @@ public class CurrentMod {
 
                 json = FabUtil.getJsonObject("https://api.modrinth.com/api/v1/mod/" + projectID);
                 modName = json.get("title").getAsString();
-                websiteUrl = "https://www.modrinth.com/mod/" + json.get("slug").getAsString();
+                websiteUrl = "https://www.modrinth.com/mod/" + json.get("slug").getAsString() + "/versions";
             }
 
-            FabUtil.sendActionBar("Checking " + modName + "..");
+            // Format Mod Name
+            modName = modName.replace("(fabric)", "");
+            modName = modName.replace("(Fabric)", "");
 
         } catch (Exception e) {}
     }
