@@ -8,11 +8,21 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 
 public class ModPlatform {
 
-    public void start(PlayerEntity player) {
+    public static boolean isRunning = false;
+
+    public void start(PlayerEntity player, String command) {
+        if (isRunning) {
+            player.sendMessage(new LiteralText("[Error] Already checking for updates!").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
+        }
+        isRunning = true;
 
         // Search through all mods
         File directoryPath = new File("mods");
@@ -43,7 +53,6 @@ public class ModPlatform {
                     CurrentMod currentMod = new CurrentMod(sha1, "modrinth");
 
                     if (currentMod.modName != null) {
-                        player.sendMessage(new LiteralText("Checking " + currentMod.modName + ".."), true);
                         // Get entire json list of release info
                         JsonArray json = FabUtil.getJsonArray("https://api.modrinth.com/api/v1/mod/" + currentMod.projectID + "/version");
                         newestFile = FabUtil.getNewUpdate(json, currentMod, "modrinth");
@@ -58,7 +67,6 @@ public class ModPlatform {
                             // Get project ID
                             currentMod = new CurrentMod(postResult, "curseforge");
                             if (currentMod.modName != null) {
-                                player.sendMessage(new LiteralText("Checking " + currentMod.modName + ".."), true);
                                 // Get entire json list of release info
                                 JsonArray json = FabUtil.getJsonArray("https://addons-ecs.forgesvc.net/api/v2/addon/" + currentMod.projectID + "/files");
                                 newestFile = FabUtil.getNewUpdate(json, currentMod, "curseforge");
@@ -71,13 +79,34 @@ public class ModPlatform {
                     }
                     // Send update message0
                     else if (newestFile != null) {
+                        if (command.equals("update")) {
+                            Text updateMessage = Text.Serializer.fromJson(" [\"\",{\"text\":\"" +
+                                    currentMod.modName + "  \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
+                                    currentMod.websiteUrl + "\"}," + "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{" + "\"text\":\"has an \"},{\"text\":\"update.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
+                                    newestFile.downloadUrl + "\"}," + "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]");
 
-                        Text updateMessage = Text.Serializer.fromJson(" [\"\",{\"text\":\"" + currentMod.modName + "  \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + currentMod.websiteUrl + "\"}," +
-                                "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{" +
-                                "\"text\":\"has an \"},{\"text\":\"update.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + newestFile.downloadUrl + "\"}," +
-                                "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]");
+                            player.sendMessage(updateMessage, false);
 
-                        player.sendMessage(updateMessage, false);
+                        }
+                        else if (command.equals("autoupdate")) {
+                            try {
+                                modFile.delete();
+                                downloadFromURL(newestFile.downloadUrl, System.getProperty("user.dir") + "/mods/" + newestFile.fileName);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            Text updateMessage = Text.Serializer.fromJson("[\"\",{\"text\":\"" +
+                                    currentMod.modName + ": \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
+                                    currentMod.websiteUrl + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[\"Website\"]}},{\"text\":\"[" +
+                                    Array.get(currentMod.fileDate.split("T"), 0) + "] \",\"color\":\"white\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[\"" +
+                                    currentMod.fileName + "\"]}},\"--> \",{\"text\":\"[" +
+                                    Array.get(newestFile.fileDate.split("T"), 0) + "]\",\"color\":\"dark_green\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[\"" +
+                                    newestFile.fileName + "\"]}}]");
+
+                            player.sendMessage(updateMessage, false);
+                        }
+
                     }
 
                 } catch (Exception e) {
@@ -87,5 +116,16 @@ public class ModPlatform {
         }
 
         player.sendMessage(new LiteralText("Finished!"), true);
+        isRunning = false;
     }
+
+    private void downloadFromURL(String urlStr, String file) throws IOException {
+        URL url = new URL(urlStr);
+        ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        fos.close();
+        rbc.close();
+    }
+
 }

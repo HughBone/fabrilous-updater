@@ -1,5 +1,6 @@
 package com.hughbone.fabrilousupdater;
 
+import com.hughbone.fabrilousupdater.command.AutoUpdateCommand;
 import com.hughbone.fabrilousupdater.command.IgnoreCommand;
 import com.hughbone.fabrilousupdater.command.ModUpdaterCommand;
 import com.hughbone.fabrilousupdater.util.FabUtil;
@@ -20,6 +21,7 @@ public class FabrilousUpdater implements ModInitializer {
         String env = FabricLoader.getInstance().getEnvironmentType().name(); // Returns client or server
         new ModUpdaterCommand().register(env);
         new IgnoreCommand().register(env);
+        new AutoUpdateCommand().register(env);
 
         // Check if the client sees this mod on a server
         Identifier identifier = new Identifier("fabrilous_updater");

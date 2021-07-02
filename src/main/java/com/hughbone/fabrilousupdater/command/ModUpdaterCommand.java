@@ -19,8 +19,7 @@ public class ModUpdaterCommand {
     public void register(String env) {
         if (env.equals("CLIENT")) {
             registerClient();
-        }
-        else {
+        } else {
             registerServer();
         }
     }
@@ -30,7 +29,7 @@ public class ModUpdaterCommand {
                 .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("update").executes(ctx -> {
                             PlayerEntity player = ClientPlayerHack.getPlayer(ctx);
                             if (FabUtil.modPresentOnServer && player.hasPermissionLevel(4)) {
-                                player.sendMessage(new LiteralText("Note: Use '/fabdateserver update' for server mods folder.").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), false);
+                                player.sendMessage(new LiteralText("Note: Use '/fabdateserver update' for server mods.").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), false);
                             }
                             new StartThread(player).start();
                             return 1;
@@ -41,14 +40,14 @@ public class ModUpdaterCommand {
     private void registerServer() {
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.literal("update").executes(ctx -> {
-                        new StartThread(ctx.getSource().getPlayer()).start();
+                    new StartThread(ctx.getSource().getPlayer()).start();
                     return 1;
                 }))
         ));
 
     }
 
-    public class StartThread extends Thread {
+    private class StartThread extends Thread {
 
         PlayerEntity player;
 
@@ -57,14 +56,15 @@ public class ModUpdaterCommand {
         }
 
         public void run() {
-            try {
-                player.sendMessage(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
-                new ModPlatform().start(player);
-                player.sendMessage(new LiteralText("[FabrilousUpdater] Finished searching!"), false);
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (ModPlatform.isRunning) {
+                player.sendMessage(new LiteralText("[Error] Already checking for updates!").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
             }
+            else {
+                player.sendMessage(new LiteralText("[FabrilousUpdater] Searching for updates. This may take a while..."), false);
+                new ModPlatform().start(player, "update");
+                player.sendMessage(new LiteralText("[FabrilousUpdater] Finished!"), false);
+            }
+
         }
     }
 
