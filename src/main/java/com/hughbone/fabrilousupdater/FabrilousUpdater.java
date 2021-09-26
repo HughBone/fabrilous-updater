@@ -13,10 +13,8 @@ import net.minecraft.util.Identifier;
 
 
 public class FabrilousUpdater implements ModInitializer {
-
     @Override
     public void onInitialize() {
-
         // Register Commands
         String env = FabricLoader.getInstance().getEnvironmentType().name(); // Returns client or server
         new ModUpdaterCommand().register(env);
@@ -33,11 +31,7 @@ public class FabrilousUpdater implements ModInitializer {
                 if (!client.isInSingleplayer()) {
                     FabUtil.modPresentOnServer = ClientPlayNetworking.canSend(identifier);
                 }
-
             });
-
-        } catch (Exception e) {}
-
+        } catch (Exception ignored) {}
     }
-
 }

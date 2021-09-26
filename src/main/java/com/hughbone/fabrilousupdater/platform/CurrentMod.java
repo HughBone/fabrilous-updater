@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 
-
 public class CurrentMod {
     public String projectID;
     public String fileDate;
@@ -56,8 +55,8 @@ public class CurrentMod {
             while (Character.toString(modName.charAt(modName.length()-1)).equals(" ")) {
                 modName = modName.substring(0, modName.length() - 1);
             }
-
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 }
