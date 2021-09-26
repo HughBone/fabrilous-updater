@@ -76,7 +76,7 @@ public class ModPlatform {
                         if (currentMod.modName == null) {
                             player.sendMessage(new LiteralText("[Error] '" + fileName + "' not found in Modrinth or CurseForge").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                         }
-                        // Send update message0
+                        // Send update message
                         else if (newestFile != null) {
                             if (command.equals("update")) {
                                 Text updateMessage = Text.Serializer.fromJson(" [\"\",{\"text\":\"" +
@@ -90,7 +90,11 @@ public class ModPlatform {
                             else if (command.equals("autoupdate")) {
                                 try {
                                     Files.delete(modFile);
-                                    downloadFromURL(newestFile.downloadUrl, FabUtil.modsDir.resolve(newestFile.fileName));
+                                    String newFileName = newestFile.fileName;
+                                    int li = fileName.lastIndexOf(".jar");
+                                    if (li < fileName.length() - 4)
+                                        newFileName += fileName.substring(li + 4);
+                                    downloadFromURL(newestFile.downloadUrl, FabUtil.modsDir.resolve(newFileName));
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
