@@ -13,9 +13,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-
 public class AutoUpdateCommand {
-
     public void register(String env) {
         if (env.equals("CLIENT")) {
             registerClient();
@@ -23,7 +21,6 @@ public class AutoUpdateCommand {
         else {
             registerServer();
         }
-
     }
 
     private void registerClient() {
@@ -65,8 +62,7 @@ public class AutoUpdateCommand {
         ));
     }
 
-    private class StartThread extends Thread {
-
+    private static class StartThread extends Thread {
         PlayerEntity player;
 
         public StartThread(PlayerEntity player) {
@@ -83,7 +79,5 @@ public class AutoUpdateCommand {
                 player.sendMessage(new LiteralText("[FabrilousUpdater] Finished! Restart Minecraft to apply updates."), false);
             }
         }
-
     }
-
 }

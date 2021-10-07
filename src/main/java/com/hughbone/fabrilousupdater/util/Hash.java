@@ -1,17 +1,15 @@
 package com.hughbone.fabrilousupdater.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
 public class Hash {
-
-    public static String getMurmurHash(File file) throws IOException {
+    public static String getMurmurHash(Path file) throws IOException {
         final int m = 0x5bd1e995;
         final int r = 24;
         long k = 0x0L;
@@ -19,33 +17,29 @@ public class Hash {
         int shift = 0x0;
 
         // get file size
-        long flength = file.length();
+        long flength = Files.size(file);
 
         // convert file to byte array
-        byte[] byteFile = Files.readAllBytes(Paths.get(file.getPath()));
+        byte[] byteFile = Files.readAllBytes(file);
 
         long length = 0;
         char b;
         // get good bytes from file
         for(int i = 0; i < flength; i++) {
-
             b = (char) byteFile[i];
 
-            if (b == 0x9 || b == 0xa || b == 0xd || b == 0x20)
-            {
+            if (b == 0x9 || b == 0xa || b == 0xd || b == 0x20) {
                 continue;
             }
 
             length += 1;
-
         }
         long h = (seed ^ length);
 
         for(int i = 0; i < flength; i++) {
             b = (char) byteFile[i];
 
-            if (b == 0x9 || b == 0xa || b == 0xd || b == 0x20)
-            {
+            if (b == 0x9 || b == 0xa || b == 0xd || b == 0x20) {
                 continue;
             }
 
@@ -82,8 +76,7 @@ public class Hash {
             }
         }
 
-        if (shift > 0)
-        {
+        if (shift > 0) {
             h = h ^ k;
             h = 0x00000000FFFFFFFFL & h;
 
@@ -104,32 +97,28 @@ public class Hash {
     }
 
 
-    public static String getSHA1(File file) {
+    public static String getSHA1(Path file) {
+        // ex. --> String shString = getSHA1(Path.of("config/renammd.jar"));
 
-        // ex. --> String shString = getSHA1(new File("config/renammd.jar"));
-
-        try {
+        try (InputStream is = Files.newInputStream(file)) {
             MessageDigest md = MessageDigest.getInstance("SHA1");
-            FileInputStream fis = new FileInputStream(file);
             byte[] dataBytes = new byte[1024];
 
-            int nread = 0;
-
-            while ((nread = fis.read(dataBytes)) != -1) {
+            int nread;
+            while ((nread = is.read(dataBytes)) != -1) {
                 md.update(dataBytes, 0, nread);
             }
 
             byte[] mdbytes = md.digest();
 
             //convert the byte to hex format
-            StringBuffer sb = new StringBuffer("");
-            for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+            StringBuilder sb = new StringBuilder();
+            for (byte mdbyte : mdbytes) {
+                sb.append(Integer.toString((mdbyte & 0xff) + 0x100, 16).substring(1));
             }
             return sb.toString().toLowerCase();
         } catch (NoSuchAlgorithmException | IOException ex) {
             throw new RuntimeException(ex);
         }
     }
-
 }

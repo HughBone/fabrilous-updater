@@ -13,9 +13,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
-
 public class ModUpdaterCommand {
-
     public void register(String env) {
         if (env.equals("CLIENT")) {
             registerClient();
@@ -47,8 +45,7 @@ public class ModUpdaterCommand {
 
     }
 
-    private class StartThread extends Thread {
-
+    private static class StartThread extends Thread {
         PlayerEntity player;
 
         public StartThread(PlayerEntity player) {
@@ -64,8 +61,6 @@ public class ModUpdaterCommand {
                 new ModPlatform().start(player, "update");
                 player.sendMessage(new LiteralText("[FabrilousUpdater] Finished!"), false);
             }
-
         }
     }
-
 }

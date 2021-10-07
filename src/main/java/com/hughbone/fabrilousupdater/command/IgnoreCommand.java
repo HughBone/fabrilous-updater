@@ -1,9 +1,6 @@
 package com.hughbone.fabrilousupdater.command;
 
-import com.hughbone.fabrilousupdater.command.suggestion.IgnoreListClient;
-import com.hughbone.fabrilousupdater.command.suggestion.IgnoreListServer;
-import com.hughbone.fabrilousupdater.command.suggestion.ModListClient;
-import com.hughbone.fabrilousupdater.command.suggestion.ModListServer;
+import com.hughbone.fabrilousupdater.command.suggestion.*;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -17,13 +14,15 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class IgnoreCommand {
-
     public void register(String env) {
         if (env.equals("CLIENT")) {
             registerClient();
@@ -37,10 +36,10 @@ public class IgnoreCommand {
     private void registerClient() {
         ClientCommandManager.DISPATCHER.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fabdate")
                 .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("ignore")
-                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("add").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(new ModListClient()).executes(ctx -> {
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("add").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes(ctx -> {
                             return execute(1, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
                         })))
-                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("remove").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(new IgnoreListClient()).executes(ctx -> {
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("remove").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes(ctx -> {
                             return execute(2, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
                         })))
                         .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("list").executes((ctx) -> {
@@ -53,10 +52,10 @@ public class IgnoreCommand {
     private void registerServer() {
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.literal("ignore")
-                        .then(CommandManager.literal("add").then(CommandManager.argument("mod", StringArgumentType.word()).suggests(new ModListServer()).executes((ctx) -> {
+                        .then(CommandManager.literal("add").then(CommandManager.argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes((ctx) -> {
                             return execute(1, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
                         })))
-                        .then(CommandManager.literal("remove").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(new IgnoreListServer()).executes((ctx) -> {
+                        .then(CommandManager.literal("remove").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes((ctx) -> {
                             return execute(2, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
                         }))))
                         .then(CommandManager.literal("list").executes((ctx) -> {
@@ -70,10 +69,7 @@ public class IgnoreCommand {
         // Remove from ignore list if mod is deleted
         FabUtil.createConfigFiles();
         try {
-            File modsPath = new File("mods");
-            File modList[] = modsPath.listFiles();
-            BufferedReader file = new BufferedReader(
-                    new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+            BufferedReader file = Files.newBufferedReader(FabUtil.updaterIgnorePath);
 
             List<String> goodLines = new ArrayList<>();
             String line;
@@ -81,9 +77,10 @@ public class IgnoreCommand {
             while ((line = file.readLine()) != null) {
                 boolean modExists = false;
 
-                for (File modFile : modList) {
-                    if (modFile.getName().contains(".jar")) {
-                        if (modFile.getName().equals(line)) {
+                for (Path modFile : Files.list(FabUtil.modsDir).toList()) {
+                    String fileName = modFile.getFileName().toString();
+                    if (fileName.contains(".jar")) {
+                        if (fileName.equals(line)) {
                             modExists = true;
                             break;
                         }
@@ -100,8 +97,7 @@ public class IgnoreCommand {
             file.close();
 
             if (modDeleted) {
-                BufferedWriter writeFile = new BufferedWriter(
-                        new FileWriter(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+                BufferedWriter writeFile = Files.newBufferedWriter(FabUtil.updaterIgnorePath);
 
                 for (String writeLine : goodLines) {
                     writeFile.write(writeLine + "\n");
@@ -109,7 +105,9 @@ public class IgnoreCommand {
                 writeFile.close();
             }
 
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -127,8 +125,7 @@ public class IgnoreCommand {
             newFile.append(modInput + "\n");
         }
         try {
-            BufferedReader file = new BufferedReader(
-                    new FileReader(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+            BufferedReader file = Files.newBufferedReader(FabUtil.updaterIgnorePath);
 
             while ((line = file.readLine()) != null) {
                 if (option == 1) {
@@ -150,18 +147,21 @@ public class IgnoreCommand {
                 }
             }
             file.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if (option == 3) {
             player.sendMessage(new LiteralText(""), false);
             return 1;
         } else {
             try {
-                BufferedWriter file = new BufferedWriter(
-                        new FileWriter(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt"));
+                BufferedWriter file = Files.newBufferedWriter(FabUtil.updaterIgnorePath);
                 file.write(newFile.toString());
                 file.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         // Success messages
         if (option == 1) {
@@ -175,5 +175,4 @@ public class IgnoreCommand {
         }
         return 1;
     }
-
 }
