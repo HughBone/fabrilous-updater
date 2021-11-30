@@ -7,19 +7,24 @@ import com.google.gson.JsonParser;
 import com.hughbone.fabrilousupdater.platform.CurrentMod;
 import com.hughbone.fabrilousupdater.platform.ReleaseFile;
 import com.mojang.bridge.game.GameVersion;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.MinecraftVersion;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
-
 public class FabUtil {
-
     public static boolean modPresentOnServer = false;
+    public static Path updaterIgnorePath = FabricLoader.getInstance().getConfigDir().resolve("fabrilous-updater-ignore.txt");
+    public static Path modsDir = FabricLoader.getInstance().getGameDir().resolve("mods");
 
     public static String sendPost(String murmurHash) throws Exception {
         String body = "[" + murmurHash + "]";
@@ -111,18 +116,15 @@ public class FabUtil {
         String[] versionStrSplit = versionStr.split("\\.");
         try {
             versionStrSplit = ArrayUtils.remove(versionStrSplit, 2);
-        } catch (IndexOutOfBoundsException e) {}
+        } catch (IndexOutOfBoundsException ignored) {}
         versionStr = versionStrSplit[0] + "." + versionStrSplit[1];
         return versionStr;
     }
 
     public static void createConfigFiles() {
         try {
-            File file = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt");
-            file.createNewFile();
-        } catch (IOException ioe) {}
-
-        new File(System.getProperty("user.dir") + File.separator + "mods" + File.separator + "Outdated_Mods").mkdirs();
+            if (!Files.exists(updaterIgnorePath))
+                Files.createFile(updaterIgnorePath);
+        } catch (IOException ignored) {}
     }
-
 }
