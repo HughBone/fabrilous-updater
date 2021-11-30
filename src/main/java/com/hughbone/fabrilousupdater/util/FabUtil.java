@@ -121,6 +121,8 @@ public class FabUtil {
             File file = new File(System.getProperty("user.dir") + File.separator + "config" + File.separator + "fabrilous-updater-ignore.txt");
             file.createNewFile();
         } catch (IOException ioe) {}
+
+        new File(System.getProperty("user.dir") + File.separator + "mods" + File.separator + "Outdated_Mods").mkdirs();
     }
 
 }

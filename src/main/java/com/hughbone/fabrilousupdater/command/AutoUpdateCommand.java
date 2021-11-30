@@ -26,6 +26,11 @@ public class AutoUpdateCommand {
 
     }
 
+    private Text getWarningMessage(String env) {
+        return Text.Serializer.fromJson("[\"\",{\"text\":\"[Warning] \",\"color\":\"red\"},\"This command automatically downloads new versions and moves old mods into the 'Outdated_Mods' folder. \",{\"text\":\"Click here to continue.\",\"color\":\"dark_green\",\"clickEvent\":{" +
+                "\"action\":\"run_command\",\"value\":\"/ඞmogus" + env + "\"}}]");
+    }
+
     private void registerClient() {
         ClientCommandManager.DISPATCHER.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fabdate")
                 .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("autoupdate").executes(ctx -> {
@@ -34,8 +39,7 @@ public class AutoUpdateCommand {
                     if (FabUtil.modPresentOnServer && player.hasPermissionLevel(4)) {
                         player.sendMessage(new LiteralText("Note: Use '/fabdateserver update' for server mods.").setStyle(Style.EMPTY.withColor(Formatting.BLUE)), false);
                     }
-                    Text warningMessage = Text.Serializer.fromJson("[\"\",{\"text\":\"[Warning] \",\"color\":\"red\"},\"This command automatically deletes old mods and downloads new versions. \",{\"text\":\"Click here to continue.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/ඞmogusClient\"}}]");
-                    player.sendMessage(warningMessage, false);
+                    player.sendMessage(getWarningMessage("Client"), false);
                     return 1;
                 }))
         );
@@ -51,8 +55,7 @@ public class AutoUpdateCommand {
     private void registerServer() {
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.literal("autoupdate").executes(ctx -> {
-                    Text warningMessage = Text.Serializer.fromJson("[\"\",{\"text\":\"[Warning] \",\"color\":\"red\"},\"This command automatically deletes old mods and downloads new versions. \",{\"text\":\"Click here to continue.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/ඞmogusServer\"}}]");
-                    ctx.getSource().getPlayer().sendMessage(warningMessage, false);
+                    ctx.getSource().getPlayer().sendMessage(getWarningMessage("Server"), false);
                     return 1;
                 }))
         ));

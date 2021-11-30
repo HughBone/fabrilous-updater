@@ -1,6 +1,7 @@
 package com.hughbone.fabrilousupdater.platform;
 
 import com.google.gson.JsonArray;
+import com.hughbone.fabrilousupdater.FabrilousUpdater;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import com.hughbone.fabrilousupdater.util.Hash;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,6 +13,9 @@ import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 
 public class ModPlatform {
@@ -90,9 +94,11 @@ public class ModPlatform {
                         }
                         else if (command.equals("autoupdate")) {
                             try {
-                                modFile.delete();
-                                downloadFromURL(newestFile.downloadUrl, System.getProperty("user.dir") + "/mods/" + newestFile.fileName);
-                            } catch (IOException e) {
+                                FabUtil.createConfigFiles();
+                                //modFile.deleteOnExit();
+                                //Files.move(modFile.toPath(), Paths.get( System.getProperty("user.dir") + File.separator + "mods" + File.separator + "Outdated_Mods" + File.separator + modFile.getName()), StandardCopyOption.REPLACE_EXISTING);
+                                //downloadFromURL(newestFile.downloadUrl, System.getProperty("user.dir") + "/mods/" + newestFile.fileName);
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
 
