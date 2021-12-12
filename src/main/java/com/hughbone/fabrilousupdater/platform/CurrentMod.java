@@ -16,8 +16,7 @@ public class CurrentMod {
     CurrentMod(String hashOrResult, String platform) {
         try {
             if (platform.equals("curseforge")) {
-                JsonParser jp = new JsonParser();
-                JsonObject json = jp.parse(hashOrResult).getAsJsonObject();
+                JsonObject json = JsonParser.parseString(hashOrResult).getAsJsonObject();
 
                 projectID = json.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("id").getAsString();
                 fileDate = json.get("exactMatches").getAsJsonArray().get(0).getAsJsonObject().get("file").getAsJsonObject().get("fileDate").getAsString();
@@ -49,6 +48,7 @@ public class CurrentMod {
             }
 
             // Format Mod Name
+            assert modName != null;
             modName = modName.replace("(fabric)", "");
             modName = modName.replace("(Fabric)", "");
             // Remove spaces at the end of the string

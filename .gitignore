@@ -15,6 +15,7 @@ classes/
 *.iml
 *.ipr
 *.iws
+remappedSrc/
 
 # vscode
 
@@ -30,3 +31,4 @@ bin/
 
 # fabric
 /run/
+/run

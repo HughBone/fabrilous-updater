@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -37,7 +38,7 @@ public class FabUtil {
         urlConn.addRequestProperty("Accept", "application/json");
         urlConn.addRequestProperty("Content-Type", "application/json");
         urlConn.addRequestProperty("Content-Type", "application/json");
-        urlConn.getOutputStream().write(body.getBytes("UTF8"));
+        urlConn.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
 
         StringBuilder content;
         BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
@@ -97,16 +98,14 @@ public class FabUtil {
 
     public static JsonArray getJsonArray(String sURL) {
         String jsonStr = getJsonString(sURL);
-        JsonParser jp = new JsonParser();
         assert jsonStr != null;
-        return jp.parse(jsonStr).getAsJsonArray();
+        return JsonParser.parseString(jsonStr).getAsJsonArray();
     }
 
     public static JsonObject getJsonObject(String sURL) {
         String jsonStr = getJsonString(sURL);
-        JsonParser jp = new JsonParser();
         assert jsonStr != null;
-        return jp.parse(jsonStr).getAsJsonObject();
+        return JsonParser.parseString(jsonStr).getAsJsonObject();
     }
 
     public static String getMinecraftVersion() {
