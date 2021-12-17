@@ -36,15 +36,9 @@ public class IgnoreCommand {
     private void registerClient() {
         ClientCommandManager.DISPATCHER.register(LiteralArgumentBuilder.<FabricClientCommandSource>literal("fabdate")
                 .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("ignore")
-                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("add").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes(ctx -> {
-                            return execute(1, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
-                        })))
-                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("remove").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes(ctx -> {
-                            return execute(2, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx));
-                        })))
-                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("list").executes((ctx) -> {
-                            return execute(3, null, ClientPlayerHack.getPlayer(ctx));
-                        }))
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("add").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes(ctx -> execute(1, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx)))))
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("remove").then(RequiredArgumentBuilder.<FabricClientCommandSource, String>argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes(ctx -> execute(2, StringArgumentType.getString(ctx, "mod"), ClientPlayerHack.getPlayer(ctx)))))
+                        .then(LiteralArgumentBuilder.<FabricClientCommandSource>literal("list").executes((ctx) -> execute(3, null, ClientPlayerHack.getPlayer(ctx))))
                 )
         );
     }
@@ -52,15 +46,9 @@ public class IgnoreCommand {
     private void registerServer() {
         CommandRegistrationCallback.EVENT.register((dispatcher, isDedicated) -> dispatcher.register(CommandManager.literal("fabdateserver").requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.literal("ignore")
-                        .then(CommandManager.literal("add").then(CommandManager.argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes((ctx) -> {
-                            return execute(1, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
-                        })))
-                        .then(CommandManager.literal("remove").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes((ctx) -> {
-                            return execute(2, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer());
-                        }))))
-                        .then(CommandManager.literal("list").executes((ctx) -> {
-                            return execute(3, null, ctx.getSource().getPlayer());
-                        }))
+                        .then(CommandManager.literal("add").then(CommandManager.argument("mod", StringArgumentType.word()).suggests(ModList::getSuggestions).executes((ctx) -> execute(1, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer()))))
+                        .then(CommandManager.literal("remove").then((CommandManager.argument("mod", StringArgumentType.word()).suggests(IgnoreList::getSuggestions).executes((ctx) -> execute(2, StringArgumentType.getString(ctx, "mod"), ctx.getSource().getPlayer())))))
+                        .then(CommandManager.literal("list").executes((ctx) -> execute(3, null, ctx.getSource().getPlayer())))
                 )
         ));
     }
@@ -122,7 +110,7 @@ public class IgnoreCommand {
         StringBuilder newFile = new StringBuilder();
         boolean isRemoved = false;
         if (option == 1) {
-            newFile.append(modInput + "\n");
+            newFile.append(modInput).append("\n");
         }
         try {
             BufferedReader file = Files.newBufferedReader(FabUtil.updaterIgnorePath);
@@ -134,11 +122,11 @@ public class IgnoreCommand {
                         file.close();
                         return 0;
                     } else {
-                        newFile.append(line + "\n");
+                        newFile.append(line).append("\n");
                     }
                 } else if (option == 2) {
                     if (!line.equals(modInput)) {
-                        newFile.append(line + "\n");
+                        newFile.append(line).append("\n");
                     } else {
                         isRemoved = true;
                     }
