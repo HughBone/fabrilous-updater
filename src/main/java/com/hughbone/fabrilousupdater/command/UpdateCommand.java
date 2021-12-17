@@ -13,7 +13,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
-public class ModUpdaterCommand {
+public class UpdateCommand {
     public void register(String env) {
         if (env.equals("CLIENT")) {
             registerClient();
@@ -42,7 +42,6 @@ public class ModUpdaterCommand {
                     return 1;
                 }))
         ));
-
     }
 
     private static class StartThread extends Thread {

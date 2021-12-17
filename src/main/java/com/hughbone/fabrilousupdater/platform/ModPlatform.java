@@ -57,7 +57,6 @@ public class ModPlatform {
                             JsonArray json = FabUtil.getJsonArray("https://api.modrinth.com/api/v1/mod/" + currentMod.projectID + "/version");
                             newestFile = FabUtil.getNewUpdate(json, currentMod, "modrinth");
                         }
-
                         // Check if CurseForge mod
                         else {
                             String murmurHash = Hash.getMurmurHash(modFile);
@@ -73,7 +72,6 @@ public class ModPlatform {
                                 }
                             }
                         }
-
                         if (currentMod.modName == null) {
                             player.sendMessage(new LiteralText("[Error] '" + fileName + "' not found in Modrinth or CurseForge").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                         }
@@ -84,9 +82,7 @@ public class ModPlatform {
                                         currentMod.modName + "  \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
                                         currentMod.websiteUrl + "\"}," + "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Website\",\"italic\":true}]}},{" + "\"text\":\"has an \"},{\"text\":\"update.\",\"color\":\"dark_green\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
                                         newestFile.downloadUrl + "\"}," + "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Direct Download\",\"italic\":true}]}}]");
-
                                 player.sendMessage(updateMessage, false);
-
                             }
                             else if (command.equals("autoupdate")) {
                                 try {
@@ -99,7 +95,6 @@ public class ModPlatform {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-
                                 Text updateMessage = Text.Serializer.fromJson("[\"\",{\"text\":\"" +
                                         currentMod.modName + ": \",\"color\":\"gold\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" +
                                         currentMod.websiteUrl + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[\"Website\"]}},{\"text\":\"[" +
@@ -107,12 +102,9 @@ public class ModPlatform {
                                         currentMod.fileName + "\"]}},\"--> \",{\"text\":\"[" +
                                         Array.get(newestFile.fileDate.split("T"), 0) + "]\",\"color\":\"dark_green\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[\"" +
                                         newestFile.fileName + "\"]}}]");
-
                                 player.sendMessage(updateMessage, false);
                             }
-
                         }
-
                     } catch (Exception e) {
                         player.sendMessage(new LiteralText("[Error] '" + fileName + "' not found in Modrinth or CurseForge").setStyle(Style.EMPTY.withColor(Formatting.RED)), false);
                     }

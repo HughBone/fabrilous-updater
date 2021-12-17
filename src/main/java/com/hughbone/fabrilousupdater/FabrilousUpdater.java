@@ -2,7 +2,7 @@ package com.hughbone.fabrilousupdater;
 
 import com.hughbone.fabrilousupdater.command.AutoUpdateCommand;
 import com.hughbone.fabrilousupdater.command.IgnoreCommand;
-import com.hughbone.fabrilousupdater.command.ModUpdaterCommand;
+import com.hughbone.fabrilousupdater.command.UpdateCommand;
 import com.hughbone.fabrilousupdater.util.FabUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -17,7 +17,7 @@ public class FabrilousUpdater implements ModInitializer {
     public void onInitialize() {
         // Register Commands
         String env = FabricLoader.getInstance().getEnvironmentType().name(); // Returns client or server
-        new ModUpdaterCommand().register(env);
+        new UpdateCommand().register(env);
         new IgnoreCommand().register(env);
         new AutoUpdateCommand().register(env);
 

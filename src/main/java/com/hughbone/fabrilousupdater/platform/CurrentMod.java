@@ -41,7 +41,6 @@ public class CurrentMod {
                         break;
                     }
                 }
-
                 json = FabUtil.getJsonObject("https://api.modrinth.com/api/v1/mod/" + projectID);
                 modName = json.get("title").getAsString();
                 websiteUrl = "https://www.modrinth.com/mod/" + json.get("slug").getAsString() + "/versions";

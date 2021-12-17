@@ -34,7 +34,6 @@ public class FabUtil {
         URL mUrl = new URL("https://addons-ecs.forgesvc.net/api/v2/fingerprint");
         urlConn = (HttpURLConnection) mUrl.openConnection();
         urlConn.setDoOutput(true);
-
         urlConn.addRequestProperty("Accept", "application/json");
         urlConn.addRequestProperty("Content-Type", "application/json");
         urlConn.addRequestProperty("Content-Type", "application/json");
@@ -42,7 +41,6 @@ public class FabUtil {
 
         StringBuilder content;
         BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
         String line;
         content = new StringBuilder();
         while ((line = br.readLine()) != null) {
@@ -75,7 +73,6 @@ public class FabUtil {
                 }
             }
         }
-
         return newestFile;
     }
 

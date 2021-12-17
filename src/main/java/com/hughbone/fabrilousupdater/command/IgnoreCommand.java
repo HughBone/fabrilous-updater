@@ -67,14 +67,11 @@ public class IgnoreCommand {
 
                 for (Path modFile : Files.list(FabUtil.modsDir).toList()) {
                     String fileName = modFile.getFileName().toString();
-                    if (fileName.contains(".jar")) {
-                        if (fileName.equals(line)) {
-                            modExists = true;
-                            break;
-                        }
+                    if (fileName.contains(".jar") && fileName.equals(line)) {
+                        modExists = true;
+                        break;
                     }
                 }
-
                 if (modExists) {
                     goodLines.add(line);
                 }
@@ -83,21 +80,17 @@ public class IgnoreCommand {
                 }
             }
             file.close();
-
             if (modDeleted) {
                 BufferedWriter writeFile = Files.newBufferedWriter(FabUtil.updaterIgnorePath);
-
                 for (String writeLine : goodLines) {
                     writeFile.write(writeLine + "\n");
                 }
                 writeFile.close();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     private int execute(int option, String modInput, PlayerEntity player) {  // Option: (1=add, 2=remove, 3=list)
         // get just the mod from input
