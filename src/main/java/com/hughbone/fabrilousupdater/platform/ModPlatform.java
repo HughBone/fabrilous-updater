@@ -42,9 +42,14 @@ public class ModPlatform {
                     }
                 } catch (IOException ignored) {}
 
+                // Check for updates
+                if (fileName.contains(".disabled")) {
+                    continue;
+                }
+
                 player.sendMessage(new LiteralText("Checking " + fileName + ".."), true);
 
-                // Check for updates
+
                 if (fileName.contains(".jar")) {
                     ReleaseFile newestFile = null;
                     try {
