@@ -1,10 +1,11 @@
-#THIS PROJECT IS DISCONTINUED
+# This PROJECT IS DISCONTINUED
+
 Dawg I'm trying to get my curseforge vbucks here, this project kinda prevents you from seeing the ads
 😳
 
 If anyone wants to update this project, the source code is available. I give you permission to do whatever you want with it
 
-# Fabrilous Updater
+## Fabrilous Updater
 Minecraft server-side (works in singleplayer!) mod used to check for updates to your Fabric mods.
 
 Note: Only works with mods uploaded to CurseForge or Modrinth.
